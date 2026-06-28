@@ -3,82 +3,84 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BigTooth CRM — Panel de Gestión</title>
+<title>BigTooth CRM</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --slate:#1B2D3A;--slate2:#243848;--slate3:#2E4558;
+  --bg:#F0F5F7;--sidebar:#1B2D3A;--white:#FDFAF5;
   --teal:#2A7C6F;--teal2:#1F5F55;--mint:#A8D5CC;
-  --ice:#F0F5F7;--ice2:#E4EEF2;--white:#F7FAFB;
-  --text:#1B2D3A;--muted:#5A7080;--border:rgba(27,45,58,0.1);
+  --slate:#1B2D3A;--text:#2C1F14;--muted:#5A7080;
+  --border:rgba(27,45,58,0.12);
   --green:#1D9E75;--amber:#BA7517;--red:#A32D2D;--blue:#185FA5;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:var(--text);background:var(--ice);display:flex;height:100vh;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:var(--text);background:var(--bg);display:flex;height:100vh;overflow:hidden}
 
-/* SIDEBAR */
-.sidebar{width:220px;background:var(--slate);display:flex;flex-direction:column;flex-shrink:0;height:100vh;overflow-y:auto}
-.sb-logo{padding:1.1rem 1rem;border-bottom:1px solid rgba(168,213,204,0.12);display:flex;align-items:center;gap:8px;flex-shrink:0}
-.sb-logo-icon{width:28px;height:28px;background:var(--teal);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sidebar{width:220px;background:var(--sidebar);display:flex;flex-direction:column;flex-shrink:0;height:100vh;overflow-y:auto}
+.sb-logo{padding:1.1rem 1rem;border-bottom:1px solid rgba(168,213,204,0.12);display:flex;align-items:center;gap:8px}
+.sb-logo-icon{width:26px;height:26px;background:var(--teal);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
 .sb-logo-text{font-size:15px;font-weight:700;color:var(--white);letter-spacing:-0.3px}
 .sb-logo-text span{color:var(--mint)}
 .sb-nav{padding:.5rem 0;flex:1}
-.sb-section{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(168,213,204,0.35);padding:.6rem 1rem .25rem;margin-top:.25rem}
-.sb-item{display:flex;align-items:center;gap:.6rem;padding:.55rem 1rem;cursor:pointer;color:rgba(247,250,251,0.5);font-size:12.5px;transition:all .15s;border-left:2px solid transparent;user-select:none}
+.sb-section{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(168,213,204,0.4);padding:.6rem 1rem .25rem;margin-top:.25rem}
+.sb-item{display:flex;align-items:center;gap:.6rem;padding:.55rem 1rem;cursor:pointer;color:rgba(247,250,251,0.55);font-size:12.5px;transition:all .15s;border-left:2px solid transparent;user-select:none}
 .sb-item:hover{color:var(--white);background:rgba(255,255,255,0.05)}
 .sb-item.active{color:var(--white);background:rgba(42,124,111,0.15);border-left-color:var(--teal)}
 .sb-item i{font-size:16px;width:20px;flex-shrink:0}
 .sb-badge{margin-left:auto;background:var(--teal);color:var(--white);font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px;min-width:20px;text-align:center}
 .sb-footer{padding:.75rem 1rem;border-top:1px solid rgba(168,213,204,0.1);flex-shrink:0}
 .sb-user{display:flex;align-items:center;gap:.6rem}
-.sb-avatar{width:28px;height:28px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--white);flex-shrink:0}
-.sb-uname{font-size:12px;color:rgba(247,250,251,0.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-avatar{width:28px;height:28px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--white)}
+.sb-uname{font-size:12px;color:rgba(247,250,251,0.6)}
 
-/* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.7rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.topbar-left{display:flex;flex-direction:column}
-.topbar-title{font-size:15px;font-weight:600;color:var(--text)}
+.topbar-title{font-size:15px;font-weight:600}
 .topbar-sub{font-size:11px;color:var(--muted);margin-top:1px}
 .topbar-actions{display:flex;gap:.5rem;align-items:center}
+
 .btn{padding:6px 14px;font-size:12px;border-radius:3px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--text);font-family:inherit;transition:background .15s;display:inline-flex;align-items:center;gap:5px}
-.btn:hover{background:var(--ice)}
+.btn:hover{background:var(--bg)}
 .btn i{font-size:14px}
 .btn-teal{background:var(--teal);color:var(--white);border-color:var(--teal)}
 .btn-teal:hover{background:var(--teal2)}
+.btn-red{background:var(--white);color:var(--red);border-color:rgba(163,45,45,0.3)}
+.btn-red:hover{background:rgba(163,45,45,0.08)}
+.btn-danger{background:var(--red);color:var(--white);border-color:var(--red)}
+.btn-danger:hover{background:#7E2222}
 
-/* CONTENT */
 .content{flex:1;overflow-y:auto;padding:1.25rem}
 .page{display:none}
 .page.active{display:block}
 
-/* STATS */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem}
 .stat-card{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:.9rem 1rem}
 .stat-label{font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
-.stat-num{font-size:24px;font-weight:600;color:var(--text);line-height:1}
+.stat-num{font-size:24px;font-weight:600;line-height:1}
 .stat-meta{font-size:11px;color:var(--muted);margin-top:.3rem;display:flex;align-items:center;gap:4px}
 .dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
 
-/* GRID */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:.75rem}
 .card{background:var(--white);border:1px solid var(--border);border-radius:6px;overflow:hidden}
 .card-head{padding:.7rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.card-title{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px}
+.card-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
 .card-title i{font-size:15px;color:var(--teal)}
 .card-meta{font-size:11px;color:var(--muted)}
+.card-body{padding:1rem}
 
-/* TABLE */
+.chart-wrap{position:relative;height:240px;padding:1rem}
+
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 th{font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);padding:.6rem 1rem;text-align:left;border-bottom:1px solid var(--border);font-weight:500;white-space:nowrap}
 td{padding:.6rem 1rem;border-bottom:1px solid rgba(27,45,58,0.05);font-size:12.5px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(42,124,111,0.03)}
-.td-name{font-weight:500;color:var(--text)}
+.td-name{font-weight:500}
 .td-sub{font-size:11px;color:var(--muted);margin-top:1px}
 
-/* BADGES */
 .badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:500}
 .badge-green{background:rgba(29,158,117,0.1);color:#0F6E56}
 .badge-amber{background:rgba(186,117,23,0.1);color:#854F0B}
@@ -87,100 +89,84 @@ tr:hover td{background:rgba(42,124,111,0.03)}
 .badge-teal{background:rgba(42,124,111,0.1);color:var(--teal2)}
 .badge-gray{background:rgba(27,45,58,0.07);color:var(--muted)}
 
-/* AGENDA */
-.agenda-list{padding:.25rem 0}
-.agenda-item{display:flex;align-items:center;gap:.75rem;padding:.5rem 1rem;border-bottom:1px solid rgba(27,45,58,0.04)}
-.agenda-item:last-child{border-bottom:none}
-.agenda-item:hover{background:rgba(42,124,111,0.03)}
-.agenda-hora{font-size:11px;color:var(--muted);width:40px;flex-shrink:0;font-weight:500}
-.agenda-bar{flex:1;padding:.3rem .65rem;border-radius:2px;border-left:2px solid var(--teal);background:rgba(42,124,111,0.06);font-size:12px}
-.agenda-bar.azul{border-left-color:var(--blue);background:rgba(24,95,165,0.05)}
-.agenda-bar.verde{border-left-color:var(--green);background:rgba(29,158,117,0.05)}
-.agenda-bar.amber{border-left-color:var(--amber);background:rgba(186,117,23,0.05)}
-.agenda-name{font-weight:500;color:var(--text)}
-.agenda-tipo{font-size:11px;color:var(--muted)}
-.agenda-empty{flex:1;font-size:12px;color:rgba(27,45,58,0.25);font-style:italic;padding:.3rem .65rem}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(27,45,58,0.5);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:8px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-head{padding:.85rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:14px;font-weight:600}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;padding:2px}
+.modal-close:hover{color:var(--text)}
 
-/* ACTIVIDAD */
-.activity-list{padding:.25rem 0}
-.activity-item{display:flex;gap:.65rem;padding:.55rem 1rem;border-bottom:1px solid rgba(27,45,58,0.04)}
-.activity-item:last-child{border-bottom:none}
-.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
-.act-text{font-size:12.5px;color:var(--text);line-height:1.5;flex:1}
-.act-time{font-size:11px;color:var(--muted);margin-top:2px}
-
-/* FORM */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;padding:1rem}
 .form-group{display:flex;flex-direction:column;gap:4px}
 .form-group.full{grid-column:1/-1}
 .form-group label{font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);font-weight:500}
-.form-group input,.form-group select,.form-group textarea{padding:8px 10px;border:1px solid var(--border);border-radius:3px;font-size:13px;color:var(--text);font-family:inherit;background:var(--ice);outline:none;transition:border .15s}
+.form-group input,.form-group select,.form-group textarea{padding:8px 10px;border:1px solid var(--border);border-radius:3px;font-size:13px;color:var(--text);font-family:inherit;background:var(--bg);outline:none}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal)}
 .form-group textarea{min-height:80px;resize:vertical}
 .form-footer{padding:.75rem 1rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.5rem}
 
-/* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(27,45,58,0.5);z-index:100;align-items:center;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal{background:var(--white);border-radius:8px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;border:1px solid var(--border)}
-.modal-head{padding:.85rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.modal-title{font-size:14px;font-weight:600;color:var(--text)}
-.modal-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:2px}
-.modal-close:hover{color:var(--text)}
-
-/* EMPTY */
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;color:var(--muted);gap:.5rem}
 .empty i{font-size:36px;opacity:.3}
-.empty p{font-size:13px}
 
-/* PRESUPUESTO ITEM */
-.pres-item{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1rem;border-bottom:1px solid rgba(27,45,58,0.05)}
-.pres-item:last-child{border-bottom:none}
-.pres-item:hover{background:rgba(42,124,111,0.03)}
-.pres-num{font-size:11px;color:var(--muted);font-weight:500}
-.pres-name{font-size:13px;font-weight:500;color:var(--text)}
-.pres-importe{font-size:13px;font-weight:600;color:var(--text)}
+.action-btn{padding:3px 8px;font-size:11px;border-radius:3px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-family:inherit;color:var(--text);transition:all .15s}
+.action-btn:hover{background:var(--bg)}
+.action-btn.red{color:var(--red);border-color:rgba(163,45,45,0.25)}
+.action-btn.red:hover{background:rgba(163,45,45,0.07)}
+
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--slate);color:var(--white);padding:.85rem 1.25rem;border-radius:4px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,0.2);z-index:200;transform:translateY(120%);transition:transform .3s ease;display:flex;align-items:center;gap:.5rem}
+.toast.show{transform:translateY(0)}
+.toast.error{background:var(--red)}
+.toast.success{background:var(--green)}
+
+.confirm-dialog{position:fixed;inset:0;background:rgba(27,45,58,0.55);z-index:150;display:none;align-items:center;justify-content:center}
+.confirm-dialog.open{display:flex}
+.confirm-box{background:var(--white);border-radius:8px;width:400px;max-width:90vw;padding:1.5rem}
+.confirm-icon{width:48px;height:48px;border-radius:50%;background:rgba(163,45,45,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;color:var(--red);font-size:22px}
+.confirm-title{font-size:15px;font-weight:600;margin-bottom:.5rem}
+.confirm-msg{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:1.25rem}
+.confirm-actions{display:flex;gap:.5rem;justify-content:flex-end}
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sb-logo">
     <div class="sb-logo-icon">🦷</div>
-    <div class="sb-logo-text">Big<span>Tooth</span> <span style="font-size:10px;font-weight:400;color:rgba(168,213,204,0.5)">CRM</span></div>
+    <div class="sb-logo-text">Big<span>Tooth</span> <span style="font-size:10px;color:rgba(168,213,204,0.5)">CRM</span></div>
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Principal</div>
     <div class="sb-item active" onclick="showPage('dashboard',this)"><i class="ti ti-layout-dashboard"></i>Dashboard</div>
-    <div class="sb-item" onclick="showPage('agenda',this)"><i class="ti ti-calendar-check"></i>Agenda<div class="sb-badge" id="badge-agenda">6</div></div>
-    <div class="sb-item" onclick="showPage('pacientes',this)"><i class="ti ti-users"></i>Pacientes</div>
+    <div class="sb-item" onclick="showPage('agenda',this)"><i class="ti ti-calendar-check"></i>Agenda<div class="sb-badge" id="badge-agenda">0</div></div>
+    <div class="sb-item" onclick="showPage('pacientes',this)"><i class="ti ti-users"></i>Pacientes<div class="sb-badge" id="badge-pacientes">0</div></div>
     <div class="sb-section">Clínica</div>
     <div class="sb-item" onclick="showPage('tratamientos',this)"><i class="ti ti-tooth"></i>Tratamientos</div>
-    <div class="sb-item" onclick="showPage('presupuestos',this)"><i class="ti ti-file-invoice"></i>Presupuestos<div class="sb-badge" id="badge-pres">3</div></div>
     <div class="sb-item" onclick="showPage('facturas',this)"><i class="ti ti-receipt-2"></i>Facturas</div>
     <div class="sb-item" onclick="showPage('radiografias',this)"><i class="ti ti-scan"></i>Radiografías</div>
+    <div class="sb-section">Análisis</div>
+    <div class="sb-item" onclick="showPage('contabilidad',this)"><i class="ti ti-chart-line"></i>Contabilidad</div>
+    <div class="sb-item" onclick="showPage('captacion',this)"><i class="ti ti-users-group"></i>Captación</div>
     <div class="sb-section">Sistema</div>
-    <div class="sb-item" onclick="showPage('ajustes',this)"><i class="ti ti-settings"></i>Ajustes</div>
+    <div class="sb-item" onclick="showPage('datos',this)"><i class="ti ti-database"></i>Gestión datos</div>
   </nav>
   <div class="sb-footer">
     <div class="sb-user">
       <div class="sb-avatar">DR</div>
-      <div class="sb-uname">Dr. Rodríguez · BigTooth</div>
+      <div class="sb-uname">Dr. Rodríguez</div>
     </div>
   </div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <div class="topbar-left">
+    <div>
       <div class="topbar-title" id="page-title">Dashboard</div>
-      <div class="topbar-sub" id="page-sub">Viernes, 27 jun 2025 · Deusto, Bilbao</div>
+      <div class="topbar-sub" id="page-sub">BigTooth · Deusto, Bilbao</div>
     </div>
     <div class="topbar-actions">
       <button class="btn" onclick="openModal('modal-paciente')"><i class="ti ti-plus"></i>Nuevo paciente</button>
-      <button class="btn btn-teal" onclick="openModal('modal-cita')"><i class="ti ti-calendar-plus"></i>Nueva cita</button>
+      <button class="btn btn-teal" onclick="refrescar()"><i class="ti ti-refresh"></i>Actualizar</button>
     </div>
   </div>
 
@@ -188,228 +174,121 @@ tr:hover td{background:rgba(42,124,111,0.03)}
 
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-label">Pacientes activos</div>
-          <div class="stat-num">248</div>
-          <div class="stat-meta"><span class="dot" style="background:var(--green)"></span>+12 este mes</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Citas hoy</div>
-          <div class="stat-num">6</div>
-          <div class="stat-meta"><span class="dot" style="background:var(--amber)"></span>2 pendientes confirmación</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Presupuestos abiertos</div>
-          <div class="stat-num">3</div>
-          <div class="stat-meta"><span class="dot" style="background:var(--blue)"></span>Total: 4.850€</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Facturación mes</div>
-          <div class="stat-num">8.240€</div>
-          <div class="stat-meta"><span class="dot" style="background:var(--green)"></span>+18% vs jun 2024</div>
-        </div>
-      </div>
+      <div class="stats-row" id="dashboard-stats"></div>
       <div class="grid-2">
         <div class="card">
-          <div class="card-head"><div class="card-title"><i class="ti ti-calendar"></i>Agenda hoy</div><div class="card-meta">Vie 27 jun</div></div>
-          <div class="agenda-list">
-            <div class="agenda-item"><div class="agenda-hora">09:00</div><div class="agenda-bar"><div class="agenda-name">Miren Uriarte</div><div class="agenda-tipo">Revisión implante · 30min</div></div></div>
-            <div class="agenda-item"><div class="agenda-hora">09:30</div><div class="agenda-bar azul"><div class="agenda-name">Eneko Gaztañaga</div><div class="agenda-tipo">Ortodoncia control · 45min</div></div></div>
-            <div class="agenda-item"><div class="agenda-hora">10:15</div><div class="agenda-bar verde"><div class="agenda-name">Ainhoa Bilbao</div><div class="agenda-tipo">Blanqueamiento LED · 60min</div></div></div>
-            <div class="agenda-item"><div class="agenda-hora">11:00</div><div class="agenda-empty">Sin cita</div></div>
-            <div class="agenda-item"><div class="agenda-hora">11:30</div><div class="agenda-bar amber"><div class="agenda-name">Jon Urrutia</div><div class="agenda-tipo">Primera visita · 60min</div></div></div>
-            <div class="agenda-item"><div class="agenda-hora">12:00</div><div class="agenda-bar azul"><div class="agenda-name">Leire Mendoza</div><div class="agenda-tipo">Consulta carillas · 30min</div></div></div>
-            <div class="agenda-item"><div class="agenda-hora">17:00</div><div class="agenda-bar verde"><div class="agenda-name">Ander Kortabarria</div><div class="agenda-tipo">Extracción · 45min</div></div></div>
-          </div>
+          <div class="card-head"><div class="card-title"><i class="ti ti-calendar"></i>Citas pendientes desde la web</div><div class="card-meta" id="citas-meta">—</div></div>
+          <div id="citas-list-dashboard"></div>
         </div>
         <div class="card">
-          <div class="card-head"><div class="card-title"><i class="ti ti-activity"></i>Actividad reciente</div><div class="card-meta">Últimas 24h</div></div>
-          <div class="activity-list">
-            <div class="activity-item"><div class="act-dot" style="background:var(--green)"></div><div><div class="act-text">Factura <strong>#F-2025-089</strong> pagada — Ainhoa Bilbao</div><div class="act-time">Hace 45 min · 320€ blanqueamiento</div></div></div>
-            <div class="activity-item"><div class="act-dot" style="background:var(--blue)"></div><div><div class="act-text">Presupuesto enviado a <strong>Jon Urrutia</strong></div><div class="act-time">Hace 2h · Implante unitario — 950€</div></div></div>
-            <div class="activity-item"><div class="act-dot" style="background:var(--teal)"></div><div><div class="act-text">Radiografía panorámica archivada — <strong>Leire Mendoza</strong></div><div class="act-time">Hace 3h · Archivo DICOM</div></div></div>
-            <div class="activity-item"><div class="act-dot" style="background:var(--amber)"></div><div><div class="act-text">Nueva cita solicitada vía web — <strong>Ander Kortabarria</strong></div><div class="act-time">Hace 5h · Pendiente confirmación</div></div></div>
-            <div class="activity-item"><div class="act-dot" style="background:var(--green)"></div><div><div class="act-text">Tratamiento completado — <strong>Miren Uriarte</strong></div><div class="act-time">Ayer 16:30 · Implante fase 2</div></div></div>
-          </div>
+          <div class="card-head"><div class="card-title"><i class="ti ti-chart-bar"></i>Facturación últimos 6 meses</div></div>
+          <div class="chart-wrap"><canvas id="chart-facturacion"></canvas></div>
         </div>
       </div>
       <div class="card">
         <div class="card-head"><div class="card-title"><i class="ti ti-users"></i>Pacientes recientes</div><button class="btn" style="font-size:11px;padding:4px 10px" onclick="showPage('pacientes',document.querySelector('[onclick*=pacientes]'))">Ver todos</button></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Paciente</th><th>Último tratamiento</th><th>Próxima cita</th><th>Estado</th><th>Saldo</th><th></th></tr></thead>
-            <tbody>
-              <tr><td><div class="td-name">Miren Uriarte</div><div class="td-sub">Getxo · 38 años</div></td><td>Implante unitario</td><td>27 jun 09:00</td><td><span class="badge badge-green">Activo</span></td><td style="font-weight:600">0€</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver</button></td></tr>
-              <tr><td><div class="td-name">Eneko Gaztañaga</div><div class="td-sub">Bilbao · 27 años</div></td><td>Invisalign fase 3</td><td>27 jun 09:30</td><td><span class="badge badge-blue">En tratamiento</span></td><td style="font-weight:600;color:var(--amber)">-240€</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver</button></td></tr>
-              <tr><td><div class="td-name">Ainhoa Bilbao</div><div class="td-sub">Deusto · 45 años</div></td><td>Blanqueamiento LED</td><td>15 ago 11:00</td><td><span class="badge badge-green">Activo</span></td><td style="font-weight:600">0€</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver</button></td></tr>
-              <tr><td><div class="td-name">Jon Urrutia</div><div class="td-sub">Barakaldo · 52 años</div></td><td>Primera visita</td><td>27 jun 11:30</td><td><span class="badge badge-amber">Presupuesto</span></td><td style="font-weight:600;color:var(--amber)">-950€</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver</button></td></tr>
-              <tr><td><div class="td-name">Leire Mendoza</div><div class="td-sub">Leioa · 31 años</div></td><td>Consulta carillas</td><td>27 jun 12:00</td><td><span class="badge badge-teal">Nuevo</span></td><td style="font-weight:600">0€</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver</button></td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="table-wrap"><table><thead><tr><th>Paciente</th><th>Zona</th><th>Estado</th><th>Teléfono</th><th>Última visita</th><th></th></tr></thead><tbody id="pacientes-recientes"></tbody></table></div>
       </div>
     </div>
 
     <!-- AGENDA -->
     <div class="page" id="page-agenda">
       <div class="card">
-        <div class="card-head"><div class="card-title"><i class="ti ti-calendar-check"></i>Agenda completa — Viernes 27 jun 2025</div><button class="btn btn-teal" onclick="openModal('modal-cita')"><i class="ti ti-plus"></i>Nueva cita</button></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Hora</th><th>Paciente</th><th>Tratamiento</th><th>Duración</th><th>Sedación</th><th>Estado</th><th></th></tr></thead>
-            <tbody>
-              <tr><td style="font-weight:600">09:00</td><td><div class="td-name">Miren Uriarte</div></td><td>Revisión implante</td><td>30 min</td><td>No</td><td><span class="badge badge-green">Confirmada</span></td><td><button class="btn" style="padding:3px 8px;font-size:11px">Editar</button></td></tr>
-              <tr><td style="font-weight:600">09:30</td><td><div class="td-name">Eneko Gaztañaga</div></td><td>Ortodoncia control</td><td>45 min</td><td>No</td><td><span class="badge badge-green">Confirmada</span></td><td><button class="btn" style="padding:3px 8px;font-size:11px">Editar</button></td></tr>
-              <tr><td style="font-weight:600">10:15</td><td><div class="td-name">Ainhoa Bilbao</div></td><td>Blanqueamiento LED</td><td>60 min</td><td>No</td><td><span class="badge badge-green">Confirmada</span></td><td><button class="btn" style="padding:3px 8px;font-size:11px">Editar</button></td></tr>
-              <tr><td style="font-weight:600">11:30</td><td><div class="td-name">Jon Urrutia</div></td><td>Primera visita</td><td>60 min</td><td>No</td><td><span class="badge badge-amber">Pendiente</span></td><td><button class="btn" style="padding:3px 8px;font-size:11px">Editar</button></td></tr>
-              <tr><td style="font-weight:600">12:00</td><td><div class="td-name">Leire Mendoza</div></td><td>Consulta carillas</td><td>30 min</td><td>No</td><td><span class="badge badge-amber">Pendiente</span></td><td><button class="btn" style="padding:3px 8px;font-size:11px">Editar</button></td></tr>
-              <tr><td style="font-weight:600">17:00</td><td><div class="td-name">Ander Kortabarria</div></td><td>Extracción molar</td><td>45 min</td><td>Sí</td><td><span class="badge badge-blue">Programada</span></td><td><button class="btn" style="padding:3px 8px;font-size:11px">Editar</button></td></tr>
-            </tbody>
-          </table>
+        <div class="card-head"><div class="card-title"><i class="ti ti-calendar-check"></i>Citas web</div>
+          <div style="display:flex;gap:.4rem"><button class="btn btn-red" onclick="confirmar('¿Borrar TODAS las citas web?', borrarTodasCitas)"><i class="ti ti-trash"></i>Borrar todas</button></div>
         </div>
+        <div class="table-wrap"><table><thead><tr><th>Solicitada</th><th>Paciente</th><th>Teléfono</th><th>Email</th><th>Tratamiento</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="agenda-tbody"></tbody></table></div>
       </div>
     </div>
 
     <!-- PACIENTES -->
     <div class="page" id="page-pacientes">
       <div class="card">
-        <div class="card-head"><div class="card-title"><i class="ti ti-users"></i>Pacientes</div><button class="btn btn-teal" onclick="openModal('modal-paciente')"><i class="ti ti-plus"></i>Nuevo paciente</button></div>
-        <div style="padding:.65rem 1rem;border-bottom:1px solid var(--border);display:flex;gap:.5rem">
-          <input placeholder="Buscar paciente..." style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:3px;font-size:12px;background:var(--ice);font-family:inherit;outline:none">
-          <select style="padding:6px 10px;border:1px solid var(--border);border-radius:3px;font-size:12px;background:var(--ice);font-family:inherit;outline:none">
-            <option>Todos los estados</option><option>Activo</option><option>En tratamiento</option><option>Nuevo</option>
-          </select>
+        <div class="card-head"><div class="card-title"><i class="ti ti-users"></i>Pacientes</div>
+          <div style="display:flex;gap:.4rem">
+            <input id="search-pacientes" placeholder="Buscar..." oninput="renderPacientes()" style="padding:6px 10px;border:1px solid var(--border);border-radius:3px;font-size:12px;background:var(--bg);outline:none;width:200px">
+            <button class="btn btn-teal" onclick="openModal('modal-paciente')"><i class="ti ti-plus"></i>Nuevo</button>
+          </div>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Paciente</th><th>Teléfono</th><th>Último tratamiento</th><th>Próxima cita</th><th>Estado</th><th>Saldo</th><th></th></tr></thead>
-            <tbody>
-              <tr><td><div class="td-name">Miren Uriarte</div><div class="td-sub">Getxo · F.Nac: 12/03/1987</div></td><td>666 123 456</td><td>Implante unitario</td><td>27 jun 09:00</td><td><span class="badge badge-green">Activo</span></td><td>0€</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver ficha</button></td></tr>
-              <tr><td><div class="td-name">Eneko Gaztañaga</div><div class="td-sub">Bilbao · F.Nac: 05/07/1997</div></td><td>677 234 567</td><td>Invisalign fase 3</td><td>27 jun 09:30</td><td><span class="badge badge-blue">En tratamiento</span></td><td style="color:var(--amber)">-240€</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver ficha</button></td></tr>
-              <tr><td><div class="td-name">Ainhoa Bilbao</div><div class="td-sub">Deusto · F.Nac: 22/11/1979</div></td><td>688 345 678</td><td>Blanqueamiento LED</td><td>15 ago 11:00</td><td><span class="badge badge-green">Activo</span></td><td>0€</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver ficha</button></td></tr>
-              <tr><td><div class="td-name">Jon Urrutia</div><div class="td-sub">Barakaldo · F.Nac: 08/04/1973</div></td><td>699 456 789</td><td>Primera visita</td><td>27 jun 11:30</td><td><span class="badge badge-amber">Presupuesto</span></td><td style="color:var(--amber)">-950€</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver ficha</button></td></tr>
-              <tr><td><div class="td-name">Leire Mendoza</div><div class="td-sub">Leioa · F.Nac: 30/09/1993</div></td><td>611 567 890</td><td>—</td><td>27 jun 12:00</td><td><span class="badge badge-teal">Nuevo</span></td><td>0€</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver ficha</button></td></tr>
-              <tr><td><div class="td-name">Ander Kortabarria</div><div class="td-sub">Basauri · F.Nac: 14/02/1988</div></td><td>622 678 901</td><td>—</td><td>27 jun 17:00</td><td><span class="badge badge-teal">Nuevo</span></td><td>0€</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver ficha</button></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- PRESUPUESTOS -->
-    <div class="page" id="page-presupuestos">
-      <div class="card">
-        <div class="card-head"><div class="card-title"><i class="ti ti-file-invoice"></i>Presupuestos</div><button class="btn btn-teal"><i class="ti ti-plus"></i>Nuevo presupuesto</button></div>
-        <div class="pres-item">
-          <div><div class="pres-num">#P-2025-031</div><div class="pres-name">Jon Urrutia — Implante unitario (incisivo)</div><div class="td-sub">Emitido 27 jun · Válido 30 días</div></div>
-          <div style="display:flex;align-items:center;gap:1rem"><div class="pres-importe">950€</div><span class="badge badge-amber">Pendiente</span><button class="btn" style="padding:3px 8px;font-size:11px">Ver</button></div>
-        </div>
-        <div class="pres-item">
-          <div><div class="pres-num">#P-2025-030</div><div class="pres-name">Leire Mendoza — Carillas porcelana x6</div><div class="td-sub">Emitido 26 jun · Válido 30 días</div></div>
-          <div style="display:flex;align-items:center;gap:1rem"><div class="pres-importe">2.800€</div><span class="badge badge-amber">Pendiente</span><button class="btn" style="padding:3px 8px;font-size:11px">Ver</button></div>
-        </div>
-        <div class="pres-item">
-          <div><div class="pres-num">#P-2025-028</div><div class="pres-name">Eneko Gaztañaga — Invisalign completo</div><div class="td-sub">Emitido 15 jun · Aceptado 17 jun</div></div>
-          <div style="display:flex;align-items:center;gap:1rem"><div class="pres-importe">3.200€</div><span class="badge badge-green">Aceptado</span><button class="btn" style="padding:3px 8px;font-size:11px">Ver</button></div>
-        </div>
-        <div class="pres-item">
-          <div><div class="pres-num">#P-2025-024</div><div class="pres-name">Miren Uriarte — Implante + corona</div><div class="td-sub">Emitido 02 jun · Aceptado 03 jun</div></div>
-          <div style="display:flex;align-items:center;gap:1rem"><div class="pres-importe">1.450€</div><span class="badge badge-green">Aceptado</span><button class="btn" style="padding:3px 8px;font-size:11px">Ver</button></div>
-        </div>
+        <div class="table-wrap"><table><thead><tr><th>Paciente</th><th>Teléfono</th><th>Email</th><th>Zona</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="pacientes-tbody"></tbody></table></div>
       </div>
     </div>
 
     <!-- TRATAMIENTOS -->
     <div class="page" id="page-tratamientos">
       <div class="card">
-        <div class="card-head"><div class="card-title"><i class="ti ti-tooth"></i>Tratamientos activos</div><div class="card-meta">4 en curso</div></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Paciente</th><th>Tratamiento</th><th>Diente/Zona</th><th>Inicio</th><th>Fin previsto</th><th>Estado</th></tr></thead>
-            <tbody>
-              <tr><td class="td-name">Miren Uriarte</td><td>Implante titanio</td><td>21 (incisivo central)</td><td>15 mar 2025</td><td>15 sep 2025</td><td><span class="badge badge-blue">Fase 2</span></td></tr>
-              <tr><td class="td-name">Eneko Gaztañaga</td><td>Invisalign</td><td>Arcada completa</td><td>17 jun 2025</td><td>17 dic 2025</td><td><span class="badge badge-blue">En curso</span></td></tr>
-              <tr><td class="td-name">Ainhoa Bilbao</td><td>Blanqueamiento LED</td><td>Arcada superior</td><td>27 jun 2025</td><td>27 jun 2025</td><td><span class="badge badge-green">Completado</span></td></tr>
-              <tr><td class="td-name">Ander Kortabarria</td><td>Extracción molar</td><td>46 (molar inf. der.)</td><td>27 jun 2025</td><td>27 jun 2025</td><td><span class="badge badge-amber">Programado</span></td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="card-head"><div class="card-title"><i class="ti ti-tooth"></i>Tratamientos</div></div>
+        <div class="table-wrap"><table><thead><tr><th>Paciente</th><th>Tratamiento</th><th>Diente/Zona</th><th>Inicio</th><th>Fin previsto</th><th>Estado</th></tr></thead><tbody id="tratamientos-tbody"></tbody></table></div>
       </div>
     </div>
 
     <!-- FACTURAS -->
     <div class="page" id="page-facturas">
+      <div class="stats-row" id="facturas-stats" style="grid-template-columns:repeat(3,1fr)"></div>
       <div class="card">
-        <div class="card-head"><div class="card-title"><i class="ti ti-receipt-2"></i>Facturas</div><div style="display:flex;gap:.5rem"><button class="btn">Exportar</button><button class="btn btn-teal"><i class="ti ti-plus"></i>Nueva factura</button></div></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Nº Factura</th><th>Paciente</th><th>Concepto</th><th>Fecha</th><th>Importe</th><th>Estado</th><th></th></tr></thead>
-            <tbody>
-              <tr><td style="font-weight:600">#F-2025-089</td><td class="td-name">Ainhoa Bilbao</td><td>Blanqueamiento LED</td><td>27 jun 2025</td><td style="font-weight:600">320€</td><td><span class="badge badge-green">Pagada</span></td><td><button class="btn" style="padding:3px 8px;font-size:11px">PDF</button></td></tr>
-              <tr><td style="font-weight:600">#F-2025-088</td><td class="td-name">Miren Uriarte</td><td>Implante fase 2</td><td>26 jun 2025</td><td style="font-weight:600">580€</td><td><span class="badge badge-green">Pagada</span></td><td><button class="btn" style="padding:3px 8px;font-size:11px">PDF</button></td></tr>
-              <tr><td style="font-weight:600">#F-2025-085</td><td class="td-name">Eneko Gaztañaga</td><td>Invisalign — pago parcial</td><td>17 jun 2025</td><td style="font-weight:600">800€</td><td><span class="badge badge-amber">Parcial</span></td><td><button class="btn" style="padding:3px 8px;font-size:11px">PDF</button></td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="card-head"><div class="card-title"><i class="ti ti-receipt-2"></i>Facturas</div></div>
+        <div class="table-wrap"><table><thead><tr><th>Nº</th><th>Paciente</th><th>Concepto</th><th>Fecha</th><th>Importe</th><th>Estado</th></tr></thead><tbody id="facturas-tbody"></tbody></table></div>
       </div>
     </div>
 
-    <!-- RADIOGRAFIAS -->
+    <!-- RADIOGRAFÍAS -->
     <div class="page" id="page-radiografias">
       <div class="card">
-        <div class="card-head"><div class="card-title"><i class="ti ti-scan"></i>Radiografías archivadas</div><button class="btn btn-teal"><i class="ti ti-upload"></i>Subir archivo</button></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Paciente</th><th>Tipo</th><th>Dientes</th><th>Fecha</th><th>Notas clínicas</th><th></th></tr></thead>
-            <tbody>
-              <tr><td class="td-name">Leire Mendoza</td><td>Panorámica</td><td>Arcada completa</td><td>27 jun 2025</td><td>Sin patología visible. Candidata a carillas.</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver</button></td></tr>
-              <tr><td class="td-name">Miren Uriarte</td><td>Periapical</td><td>21, 22</td><td>14 mar 2025</td><td>Hueso adecuado para implante. Proceder fase 1.</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver</button></td></tr>
-              <tr><td class="td-name">Jon Urrutia</td><td>Aleta de mordida</td><td>16, 17, 26, 27</td><td>27 jun 2025</td><td>Caries interproximal leve en 17. Revisar.</td><td><button class="btn" style="padding:3px 8px;font-size:11px">Ver</button></td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="card-head"><div class="card-title"><i class="ti ti-scan"></i>Radiografías archivadas</div></div>
+        <div class="table-wrap"><table><thead><tr><th>Paciente</th><th>Tipo</th><th>Dientes</th><th>Fecha</th><th>Notas clínicas</th></tr></thead><tbody id="radiografias-tbody"></tbody></table></div>
       </div>
     </div>
 
-    <!-- AJUSTES -->
-    <div class="page" id="page-ajustes">
+    <!-- CONTABILIDAD -->
+    <div class="page" id="page-contabilidad">
+      <div class="stats-row" id="contab-stats"></div>
+      <div class="grid-2">
+        <div class="card"><div class="card-head"><div class="card-title"><i class="ti ti-chart-line"></i>Evolución mensual</div></div><div class="chart-wrap"><canvas id="chart-evolucion"></canvas></div></div>
+        <div class="card"><div class="card-head"><div class="card-title"><i class="ti ti-chart-donut"></i>Ingresos por tratamiento</div></div><div class="chart-wrap"><canvas id="chart-tratamientos"></canvas></div></div>
+      </div>
+      <div class="card"><div class="card-head"><div class="card-title"><i class="ti ti-chart-area"></i>Pagadas vs pendientes</div></div><div class="chart-wrap" style="height:280px"><canvas id="chart-pagadas"></canvas></div></div>
+    </div>
+
+    <!-- CAPTACIÓN -->
+    <div class="page" id="page-captacion">
+      <div class="stats-row" id="capt-stats"></div>
+      <div class="grid-2">
+        <div class="card"><div class="card-head"><div class="card-title"><i class="ti ti-trending-up"></i>Nuevos pacientes / mes</div></div><div class="chart-wrap"><canvas id="chart-nuevos"></canvas></div></div>
+        <div class="card"><div class="card-head"><div class="card-title"><i class="ti ti-map-pin"></i>Distribución por zona</div></div><div class="chart-wrap"><canvas id="chart-zonas"></canvas></div></div>
+      </div>
       <div class="card">
-        <div class="card-head"><div class="card-title"><i class="ti ti-settings"></i>Configuración de la clínica</div></div>
-        <div class="form-grid">
-          <div class="form-group"><label>Nombre clínica</label><input value="BigTooth Clínica Dental"></div>
-          <div class="form-group"><label>CIF</label><input value="B-48123456"></div>
-          <div class="form-group"><label>Dirección</label><input value="C/ Lehendakari Aguirre, 23"></div>
-          <div class="form-group"><label>CP y ciudad</label><input value="48014 Deusto, Bilbao"></div>
-          <div class="form-group"><label>Teléfono</label><input value="944 123 456"></div>
-          <div class="form-group"><label>Email</label><input value="info@bigtooth.es"></div>
-          <div class="form-group"><label>Horario Lun–Vie</label><input value="09:00 – 20:00"></div>
-          <div class="form-group"><label>Horario sábados</label><input value="09:00 – 14:00"></div>
-          <div class="form-group"><label>Duración cita por defecto (min)</label><input type="number" value="30"></div>
-          <div class="form-group"><label>IVA dental (%)</label><input type="number" value="0"></div>
-          <div class="form-group full"><label>Notas internas</label><textarea>Clínica especializada en implantología y estética dental. Atención en euskera disponible con todo el equipo. Sedación consciente con óxido nitroso disponible bajo petición.</textarea></div>
-        </div>
-        <div class="form-footer"><button class="btn">Cancelar</button><button class="btn btn-teal">Guardar cambios</button></div>
+        <div class="card-head"><div class="card-title"><i class="ti ti-bulb"></i>Recomendaciones para captación</div></div>
+        <div style="padding:1rem;display:flex;flex-direction:column;gap:.75rem" id="recomendaciones"></div>
       </div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /main -->
-
-<!-- MODAL NUEVA CITA -->
-<div class="modal-overlay" id="modal-cita">
-  <div class="modal">
-    <div class="modal-head"><div class="modal-title">Nueva cita</div><button class="modal-close" onclick="closeModal('modal-cita')">✕</button></div>
-    <div class="form-grid">
-      <div class="form-group full"><label>Paciente</label><select><option>Seleccionar paciente...</option><option>Miren Uriarte</option><option>Eneko Gaztañaga</option><option>Ainhoa Bilbao</option><option>Jon Urrutia</option><option>Leire Mendoza</option><option>Ander Kortabarria</option></select></div>
-      <div class="form-group"><label>Fecha</label><input type="date" value="2025-06-27"></div>
-      <div class="form-group"><label>Hora</label><input type="time" value="09:00"></div>
-      <div class="form-group"><label>Duración (min)</label><input type="number" value="30"></div>
-      <div class="form-group"><label>Tipo de tratamiento</label><select><option>Primera visita</option><option>Implante</option><option>Ortodoncia</option><option>Blanqueamiento</option><option>Estética dental</option><option>Extracción</option><option>Revisión</option></select></div>
-      <div class="form-group full"><label>Sedación consciente</label><select><option>No</option><option>Sí — óxido nitroso</option></select></div>
-      <div class="form-group full"><label>Notas</label><textarea placeholder="Observaciones para esta cita..."></textarea></div>
+    <!-- GESTIÓN DE DATOS -->
+    <div class="page" id="page-datos">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><i class="ti ti-database"></i>Datos de demostración</div></div>
+          <div style="padding:1rem">
+            <p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:1rem">Carga datos ficticios para probar el CRM. Esto sobreescribirá los datos actuales.</p>
+            <div style="display:flex;gap:.5rem">
+              <button class="btn btn-teal" onclick="cargarDemo()"><i class="ti ti-upload"></i>Cargar demo</button>
+              <button class="btn btn-red" onclick="confirmar('¿Borrar TODOS los datos de demo?', borrarDemo)"><i class="ti ti-trash"></i>Borrar demo</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title" style="color:var(--red)"><i class="ti ti-alert-triangle"></i>Zona crítica</div></div>
+          <div style="padding:1rem">
+            <p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:1rem">Borra todos los pacientes y sus datos asociados (facturas, tratamientos, radiografías).</p>
+            <button class="btn btn-danger" onclick="confirmar('Esto borrará TODOS los pacientes y sus facturas, tratamientos y radiografías. ¿Continuar?', borrarTodo)"><i class="ti ti-alert-triangle"></i>Borrar todos los datos</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><i class="ti ti-info-circle"></i>Estado del sistema</div></div>
+        <div style="padding:1rem" id="sistema-stats"></div>
+      </div>
     </div>
-    <div class="form-footer"><button class="btn" onclick="closeModal('modal-cita')">Cancelar</button><button class="btn btn-teal">Guardar cita</button></div>
+
   </div>
 </div>
 
@@ -417,31 +296,69 @@ tr:hover td{background:rgba(42,124,111,0.03)}
 <div class="modal-overlay" id="modal-paciente">
   <div class="modal">
     <div class="modal-head"><div class="modal-title">Nuevo paciente</div><button class="modal-close" onclick="closeModal('modal-paciente')">✕</button></div>
-    <div class="form-grid">
-      <div class="form-group"><label>Nombre</label><input placeholder="Nombre"></div>
-      <div class="form-group"><label>Apellidos</label><input placeholder="Apellidos"></div>
-      <div class="form-group"><label>Fecha de nacimiento</label><input type="date"></div>
-      <div class="form-group"><label>Teléfono</label><input placeholder="666 000 000"></div>
-      <div class="form-group full"><label>Email</label><input placeholder="correo@ejemplo.com"></div>
-      <div class="form-group full"><label>Alergias / medicamentos</label><input placeholder="Indicar si tiene alergias conocidas..."></div>
-      <div class="form-group full"><label>Historial médico relevante</label><textarea placeholder="Enfermedades, cirugías previas, medicación habitual..."></textarea></div>
-    </div>
-    <div class="form-footer"><button class="btn" onclick="closeModal('modal-paciente')">Cancelar</button><button class="btn btn-teal">Guardar paciente</button></div>
+    <form id="form-paciente" onsubmit="crearPaciente(event)">
+      <div class="form-grid">
+        <div class="form-group"><label>Nombre *</label><input name="nombre" required></div>
+        <div class="form-group"><label>Apellidos *</label><input name="apellidos" required></div>
+        <div class="form-group"><label>Fecha nacimiento</label><input name="fecha_nac" type="date"></div>
+        <div class="form-group"><label>Teléfono *</label><input name="telefono" required placeholder="944 000 000"></div>
+        <div class="form-group full"><label>Email</label><input name="email" type="email"></div>
+        <div class="form-group"><label>Zona</label><input name="zona" placeholder="Bilbao"></div>
+        <div class="form-group"><label>Estado</label>
+          <select name="estado"><option value="nuevo">Nuevo</option><option value="activo">Activo</option><option value="en_tratamiento">En tratamiento</option><option value="presupuesto">Presupuesto pendiente</option></select>
+        </div>
+        <div class="form-group full"><label>Alergias / medicamentos</label><input name="alergias"></div>
+        <div class="form-group full"><label>Historial médico</label><textarea name="historial"></textarea></div>
+      </div>
+      <div class="form-footer"><button type="button" class="btn" onclick="closeModal('modal-paciente')">Cancelar</button><button type="submit" class="btn btn-teal">Guardar paciente</button></div>
+    </form>
   </div>
 </div>
 
+<!-- MODAL FICHA PACIENTE -->
+<div class="modal-overlay" id="modal-ficha">
+  <div class="modal" style="width:640px">
+    <div class="modal-head"><div class="modal-title" id="ficha-titulo">Ficha paciente</div><button class="modal-close" onclick="closeModal('modal-ficha')">✕</button></div>
+    <div id="ficha-body" style="padding:1.25rem"></div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-dialog" id="confirm">
+  <div class="confirm-box">
+    <div class="confirm-icon">⚠️</div>
+    <div class="confirm-title">Confirmar acción</div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-actions">
+      <button class="btn" onclick="cerrarConfirm()">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
+// ── ESTADO GLOBAL ───────────────────────────────────────────────
+const state = { citas:[], pacientes:[], facturas:[], tratamientos:[], radiografias:[] };
+const charts = {};
+
 const titles = {
-  dashboard:'Dashboard', agenda:'Agenda', pacientes:'Pacientes',
-  tratamientos:'Tratamientos', presupuestos:'Presupuestos',
-  facturas:'Facturas', radiografias:'Radiografías', ajustes:'Ajustes'
+  dashboard:'Dashboard', agenda:'Agenda · Citas web', pacientes:'Pacientes',
+  tratamientos:'Tratamientos', facturas:'Facturas', radiografias:'Radiografías',
+  contabilidad:'Contabilidad', captacion:'Captación de pacientes', datos:'Gestión de datos'
 };
+
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
   document.getElementById('page-title').textContent = titles[id] || id;
+  if (id === 'contabilidad') renderContabilidad();
+  if (id === 'captacion') renderCaptacion();
+  if (id === 'datos') renderSistema();
 }
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -449,67 +366,499 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
 });
 
-// ── INTEGRACIÓN CON WEB BIGTOOTH — cargar citas desde /api/citas ──
-async function cargarCitasWeb() {
+// ── TOASTS ─────────────────────────────────────────────────────
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── CONFIRM DIALOG ─────────────────────────────────────────────
+let confirmCallback = null;
+function confirmar(msg, cb) {
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm').classList.add('open');
+  confirmCallback = cb;
+}
+function cerrarConfirm() { document.getElementById('confirm').classList.remove('open'); confirmCallback = null; }
+document.getElementById('confirm-ok').addEventListener('click', () => {
+  if (confirmCallback) confirmCallback();
+  cerrarConfirm();
+});
+
+// ── API ─────────────────────────────────────────────────────────
+async function api(path, opts={}) {
+  const res = await fetch(path, { headers:{'Content-Type':'application/json'}, ...opts });
+  if (!res.ok) {
+    const err = await res.json().catch(()=>({error:res.statusText}));
+    throw new Error(err.error || res.statusText);
+  }
+  return res.json();
+}
+
+// ── CARGA DE DATOS ──────────────────────────────────────────────
+async function cargarTodo() {
   try {
-    const res = await fetch('/api/citas');
-    if (!res.ok) return;
-    const citas = await res.json();
-    if (!Array.isArray(citas) || citas.length === 0) return;
-
-    // Actualizar badge de agenda
-    const badge = document.getElementById('badge-agenda');
-    if (badge) badge.textContent = (parseInt(badge.textContent || '0', 10) + citas.length);
-
-    // Buscar contenedor de actividad reciente y prepender las citas web
-    const activityList = document.querySelector('#page-dashboard .activity-list');
-    if (activityList && citas.length > 0) {
-      const recientes = citas.slice(-3).reverse();
-      recientes.forEach(c => {
-        const item = document.createElement('div');
-        item.className = 'activity-item';
-        const fecha = new Date(c.created_at);
-        const hace = Math.round((Date.now() - fecha.getTime()) / 60000);
-        const tiempo = hace < 60 ? `Hace ${hace} min` : hace < 1440 ? `Hace ${Math.round(hace/60)}h` : `Hace ${Math.round(hace/1440)}d`;
-        item.innerHTML = `
-          <div class="act-dot" style="background:#1D9E75"></div>
-          <div>
-            <div class="act-text">🌐 <strong>Nueva cita desde la web</strong> — ${c.nombre}</div>
-            <div class="act-time">${tiempo} · ${c.tratamiento} · ${c.telefono}</div>
-          </div>`;
-        activityList.insertBefore(item, activityList.firstChild);
-      });
-    }
-
-    // Añadir filas a la tabla de agenda completa
-    const agendaTable = document.querySelector('#page-agenda tbody');
-    if (agendaTable) {
-      citas.reverse().forEach(c => {
-        const tr = document.createElement('tr');
-        const fecha = new Date(c.created_at);
-        const hora = fecha.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
-        tr.innerHTML = `
-          <td style="font-weight:600">${hora}</td>
-          <td><div class="td-name">${c.nombre}</div><div class="td-sub">📞 ${c.telefono}</div></td>
-          <td>${c.tratamiento}</td>
-          <td>—</td>
-          <td>No</td>
-          <td><span class="badge badge-amber">Web · Pendiente</span></td>
-          <td><button class="btn" style="padding:3px 8px;font-size:11px">Confirmar</button></td>
-        `;
-        agendaTable.insertBefore(tr, agendaTable.firstChild);
-      });
-    }
-
-    console.log(`✓ ${citas.length} citas web cargadas del endpoint`);
-  } catch(err) {
-    console.log('CRM working offline:', err.message);
+    const [citas, all] = await Promise.all([
+      api('/api/citas').catch(()=>[]),
+      api('/api/pacientes?action=all').catch(()=>({pacientes:[],facturas:[],tratamientos:[],radiografias:[]}))
+    ]);
+    state.citas = Array.isArray(citas) ? citas : [];
+    state.pacientes = all.pacientes || [];
+    state.facturas = all.facturas || [];
+    state.tratamientos = all.tratamientos || [];
+    state.radiografias = all.radiografias || [];
+    renderTodo();
+  } catch(e) {
+    toast('Error cargando datos: '+e.message, 'error');
   }
 }
 
-// Cargar al iniciar y refrescar cada 30s
-cargarCitasWeb();
-setInterval(cargarCitasWeb, 30000);
+function renderTodo() {
+  renderDashboard();
+  renderAgenda();
+  renderPacientes();
+  renderTratamientos();
+  renderFacturas();
+  renderRadiografias();
+  document.getElementById('badge-agenda').textContent = state.citas.filter(c=>c.estado==='pendiente').length;
+  document.getElementById('badge-pacientes').textContent = state.pacientes.length;
+}
+
+// ── DASHBOARD ───────────────────────────────────────────────────
+function renderDashboard() {
+  const facturadoMes = state.facturas
+    .filter(f => new Date(f.fecha).getMonth() === new Date().getMonth() && f.pagada)
+    .reduce((sum, f) => sum + (parseFloat(f.importe)||0), 0);
+  const citasPend = state.citas.filter(c => c.estado === 'pendiente').length;
+  const enTrat = state.pacientes.filter(p => p.estado === 'en_tratamiento').length;
+
+  document.getElementById('dashboard-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Pacientes</div><div class="stat-num">${state.pacientes.length}</div><div class="stat-meta"><span class="dot" style="background:var(--green)"></span>${state.pacientes.filter(p=>p.estado==='nuevo').length} nuevos</div></div>
+    <div class="stat-card"><div class="stat-label">Citas pendientes</div><div class="stat-num">${citasPend}</div><div class="stat-meta"><span class="dot" style="background:var(--amber)"></span>desde la web</div></div>
+    <div class="stat-card"><div class="stat-label">En tratamiento</div><div class="stat-num">${enTrat}</div><div class="stat-meta"><span class="dot" style="background:var(--blue)"></span>activos</div></div>
+    <div class="stat-card"><div class="stat-label">Facturación mes</div><div class="stat-num">${facturadoMes.toFixed(0)}€</div><div class="stat-meta"><span class="dot" style="background:var(--green)"></span>pagadas</div></div>
+  `;
+
+  // Citas pendientes desde la web
+  const citasUl = document.getElementById('citas-list-dashboard');
+  document.getElementById('citas-meta').textContent = `${citasPend} pendientes`;
+  if (citasPend === 0) {
+    citasUl.innerHTML = '<div class="empty"><i class="ti ti-calendar-off"></i><p style="font-size:12px">Sin citas pendientes</p></div>';
+  } else {
+    citasUl.innerHTML = '<div class="table-wrap"><table><tbody>' +
+      state.citas.filter(c=>c.estado==='pendiente').slice(0,5).map(c => `
+        <tr>
+          <td><div class="td-name">${c.nombre}</div><div class="td-sub">${c.tratamiento} · 📞 ${c.telefono}</div></td>
+          <td><span class="badge badge-amber">Pendiente</span></td>
+          <td style="text-align:right">
+            <button class="action-btn" onclick="confirmarCita('${c.id}')">Confirmar</button>
+            <button class="action-btn red" onclick="confirmar('¿Borrar cita de ${c.nombre}?', ()=>borrarCita('${c.id}'))">Borrar</button>
+          </td>
+        </tr>`).join('') + '</tbody></table></div>';
+  }
+
+  // Pacientes recientes
+  const tbody = document.getElementById('pacientes-recientes');
+  if (state.pacientes.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><i class="ti ti-user-off"></i><p style="font-size:12px">Sin pacientes — carga datos demo desde Sistema → Gestión datos</p></div></td></tr>';
+  } else {
+    tbody.innerHTML = state.pacientes.slice(0,5).map(p => `
+      <tr>
+        <td><div class="td-name">${p.nombre} ${p.apellidos||''}</div><div class="td-sub">F.Nac: ${p.fecha_nac||'-'}</div></td>
+        <td>${p.zona||'-'}</td>
+        <td><span class="badge ${estadoBadge(p.estado)}">${estadoLabel(p.estado)}</span></td>
+        <td>${p.telefono||'-'}</td>
+        <td>${p.created_at ? new Date(p.created_at).toLocaleDateString('es-ES') : '-'}</td>
+        <td><button class="action-btn" onclick="verFicha('${p.id}')">Ver ficha</button></td>
+      </tr>`).join('');
+  }
+
+  renderChartFacturacion();
+}
+
+function estadoLabel(e){return{activo:'Activo',en_tratamiento:'En tratamiento',presupuesto:'Presupuesto',nuevo:'Nuevo'}[e]||e||'-'}
+function estadoBadge(e){return{activo:'badge-green',en_tratamiento:'badge-blue',presupuesto:'badge-amber',nuevo:'badge-teal'}[e]||'badge-gray'}
+
+// ── AGENDA ──────────────────────────────────────────────────────
+function renderAgenda() {
+  const tbody = document.getElementById('agenda-tbody');
+  if (state.citas.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><i class="ti ti-calendar-off"></i><p style="font-size:12px">Sin citas web</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.citas.slice().reverse().map(c => {
+    const fecha = new Date(c.created_at);
+    return `<tr>
+      <td><div class="td-name">${fecha.toLocaleDateString('es-ES')}</div><div class="td-sub">${fecha.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</div></td>
+      <td><div class="td-name">${c.nombre}</div></td>
+      <td>${c.telefono}</td>
+      <td>${c.email||'-'}</td>
+      <td>${c.tratamiento}</td>
+      <td><span class="badge ${c.estado==='confirmada'?'badge-green':c.estado==='cancelada'?'badge-red':'badge-amber'}">${c.estado}</span></td>
+      <td>
+        ${c.estado==='pendiente'?`<button class="action-btn" onclick="confirmarCita('${c.id}')">Confirmar</button>`:''}
+        <button class="action-btn red" onclick="confirmar('¿Borrar cita de ${c.nombre}?', ()=>borrarCita('${c.id}'))">Borrar</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function confirmarCita(id) {
+  try {
+    await api(`/api/citas?id=${id}`, { method:'PATCH', body: JSON.stringify({estado:'confirmada'}) });
+    toast('Cita confirmada');
+    cargarTodo();
+  } catch(e) { toast('Error: '+e.message, 'error'); }
+}
+
+async function borrarCita(id) {
+  try {
+    await api(`/api/citas?id=${id}`, { method:'DELETE' });
+    toast('Cita eliminada');
+    cargarTodo();
+  } catch(e) { toast('Error: '+e.message, 'error'); }
+}
+
+async function borrarTodasCitas() {
+  try {
+    await api('/api/citas?id=all', { method:'DELETE' });
+    toast('Todas las citas eliminadas');
+    cargarTodo();
+  } catch(e) { toast('Error: '+e.message, 'error'); }
+}
+
+// ── PACIENTES ───────────────────────────────────────────────────
+function renderPacientes() {
+  const q = (document.getElementById('search-pacientes')?.value || '').toLowerCase();
+  const filtered = state.pacientes.filter(p => !q ||
+    (`${p.nombre} ${p.apellidos||''} ${p.zona||''} ${p.telefono||''} ${p.email||''}`).toLowerCase().includes(q));
+  const tbody = document.getElementById('pacientes-tbody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><i class="ti ti-user-off"></i><p style="font-size:12px">${q ? 'Sin resultados' : 'Sin pacientes — carga datos demo'}</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(p => `
+    <tr>
+      <td><div class="td-name">${p.nombre} ${p.apellidos||''}</div><div class="td-sub">F.Nac: ${p.fecha_nac||'-'}</div></td>
+      <td>${p.telefono||'-'}</td>
+      <td>${p.email||'-'}</td>
+      <td>${p.zona||'-'}</td>
+      <td><span class="badge ${estadoBadge(p.estado)}">${estadoLabel(p.estado)}</span></td>
+      <td style="white-space:nowrap">
+        <button class="action-btn" onclick="verFicha('${p.id}')">Ver ficha</button>
+        <button class="action-btn red" onclick="confirmar('¿Borrar paciente ${p.nombre} ${p.apellidos||''}? Se eliminarán también sus facturas, tratamientos y radiografías.', ()=>borrarPaciente('${p.id}'))">Borrar</button>
+      </td>
+    </tr>`).join('');
+}
+
+function verFicha(id) {
+  const p = state.pacientes.find(x => x.id === id);
+  if (!p) return;
+  const fact = state.facturas.filter(f => f.paciente_id === id);
+  const trat = state.tratamientos.filter(t => t.paciente_id === id);
+  const rad = state.radiografias.filter(r => r.paciente_id === id);
+  const totalFacturado = fact.reduce((s,f) => s + (parseFloat(f.importe)||0), 0);
+  const totalPagado = fact.filter(f=>f.pagada).reduce((s,f) => s + (parseFloat(f.importe)||0), 0);
+
+  document.getElementById('ficha-titulo').textContent = `${p.nombre} ${p.apellidos||''}`;
+  document.getElementById('ficha-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem">
+      <div><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Teléfono</div><div style="font-size:13px;font-weight:500">${p.telefono||'-'}</div></div>
+      <div><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Email</div><div style="font-size:13px;font-weight:500">${p.email||'-'}</div></div>
+      <div><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Zona</div><div style="font-size:13px;font-weight:500">${p.zona||'-'}</div></div>
+      <div><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Fecha nac.</div><div style="font-size:13px;font-weight:500">${p.fecha_nac||'-'}</div></div>
+      <div class="full" style="grid-column:1/-1"><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Alergias</div><div style="font-size:13px">${p.alergias||'Ninguna'}</div></div>
+      <div class="full" style="grid-column:1/-1"><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Historial</div><div style="font-size:13px;line-height:1.5">${p.historial||'-'}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1.25rem">
+      <div style="background:var(--bg);padding:.7rem;border-radius:4px"><div style="font-size:18px;font-weight:600">${totalFacturado.toFixed(0)}€</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Facturado</div></div>
+      <div style="background:var(--bg);padding:.7rem;border-radius:4px"><div style="font-size:18px;font-weight:600;color:var(--green)">${totalPagado.toFixed(0)}€</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Pagado</div></div>
+      <div style="background:var(--bg);padding:.7rem;border-radius:4px"><div style="font-size:18px;font-weight:600;color:var(--amber)">${(totalFacturado-totalPagado).toFixed(0)}€</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Pendiente</div></div>
+    </div>
+    <div style="margin-bottom:1rem"><div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">Tratamientos (${trat.length})</div>
+      ${trat.length===0?'<div style="font-size:12px;color:var(--muted)">Sin tratamientos</div>':
+        '<table style="width:100%"><tbody>'+trat.map(t=>`<tr><td style="padding:.4rem 0;font-size:12px;border-bottom:1px solid var(--border)"><strong>${t.tipo}</strong> · ${t.diente} · <span class="badge ${t.estado==='completado'?'badge-green':t.estado==='en_curso'||t.estado==='fase_2'?'badge-blue':'badge-amber'}">${t.estado.replace('_',' ')}</span></td></tr>`).join('')+'</tbody></table>'}
+    </div>
+    <div style="margin-bottom:1rem"><div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">Facturas (${fact.length})</div>
+      ${fact.length===0?'<div style="font-size:12px;color:var(--muted)">Sin facturas</div>':
+        '<table style="width:100%"><tbody>'+fact.map(f=>`<tr><td style="padding:.4rem 0;font-size:12px;border-bottom:1px solid var(--border)"><strong>${f.numero}</strong> · ${f.concepto} · ${f.importe}€ <span class="badge ${f.pagada?'badge-green':'badge-amber'}" style="margin-left:.5rem">${f.pagada?'Pagada':'Pendiente'}</span></td></tr>`).join('')+'</tbody></table>'}
+    </div>
+    <div><div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">Radiografías (${rad.length})</div>
+      ${rad.length===0?'<div style="font-size:12px;color:var(--muted)">Sin radiografías</div>':
+        '<table style="width:100%"><tbody>'+rad.map(r=>`<tr><td style="padding:.4rem 0;font-size:12px;border-bottom:1px solid var(--border)"><strong>${r.tipo}</strong> · ${r.dientes} · ${r.fecha}<div style="font-size:11px;color:var(--muted);margin-top:2px">${r.notas||''}</div></td></tr>`).join('')+'</tbody></table>'}
+    </div>
+    <div style="display:flex;gap:.5rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
+      <button class="btn btn-red" onclick="confirmar('¿Borrar ficha completa de ${p.nombre} ${p.apellidos||''}?', ()=>{borrarPaciente('${p.id}');closeModal('modal-ficha');})"><i class="ti ti-trash"></i>Borrar ficha completa</button>
+    </div>
+  `;
+  openModal('modal-ficha');
+}
+
+async function borrarPaciente(id) {
+  try {
+    await api(`/api/pacientes?id=${id}`, { method:'DELETE' });
+    toast('Paciente eliminado');
+    cargarTodo();
+  } catch(e) { toast('Error: '+e.message, 'error'); }
+}
+
+async function crearPaciente(e) {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const data = Object.fromEntries(fd);
+  try {
+    await api('/api/pacientes', { method:'POST', body: JSON.stringify(data) });
+    toast('Paciente creado');
+    closeModal('modal-paciente');
+    e.target.reset();
+    cargarTodo();
+  } catch(err) { toast('Error: '+err.message, 'error'); }
+}
+
+// ── TRATAMIENTOS ────────────────────────────────────────────────
+function renderTratamientos() {
+  const tbody = document.getElementById('tratamientos-tbody');
+  if (state.tratamientos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><i class="ti ti-tooth"></i><p style="font-size:12px">Sin tratamientos</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.tratamientos.map(t => {
+    const p = state.pacientes.find(x => x.id === t.paciente_id) || {};
+    return `<tr>
+      <td class="td-name">${p.nombre||'-'} ${p.apellidos||''}</td>
+      <td>${t.tipo}</td><td>${t.diente}</td><td>${t.inicio}</td><td>${t.fin_previsto||'-'}</td>
+      <td><span class="badge ${t.estado==='completado'?'badge-green':t.estado==='en_curso'||t.estado==='fase_2'?'badge-blue':'badge-amber'}">${t.estado.replace('_',' ')}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── FACTURAS ────────────────────────────────────────────────────
+function renderFacturas() {
+  const total = state.facturas.reduce((s,f)=>s+parseFloat(f.importe||0),0);
+  const pagado = state.facturas.filter(f=>f.pagada).reduce((s,f)=>s+parseFloat(f.importe||0),0);
+  const pendiente = total - pagado;
+  document.getElementById('facturas-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total facturado</div><div class="stat-num">${total.toFixed(0)}€</div></div>
+    <div class="stat-card"><div class="stat-label">Cobrado</div><div class="stat-num" style="color:var(--green)">${pagado.toFixed(0)}€</div></div>
+    <div class="stat-card"><div class="stat-label">Pendiente</div><div class="stat-num" style="color:var(--amber)">${pendiente.toFixed(0)}€</div></div>
+  `;
+  const tbody = document.getElementById('facturas-tbody');
+  if (state.facturas.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><i class="ti ti-receipt"></i><p style="font-size:12px">Sin facturas</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.facturas.map(f => {
+    const p = state.pacientes.find(x => x.id === f.paciente_id) || {};
+    return `<tr>
+      <td style="font-weight:600">${f.numero}</td>
+      <td class="td-name">${p.nombre||'-'} ${p.apellidos||''}</td>
+      <td>${f.concepto}</td><td>${f.fecha}</td>
+      <td style="font-weight:600">${f.importe}€</td>
+      <td><span class="badge ${f.pagada?'badge-green':'badge-amber'}">${f.pagada?'Pagada':'Pendiente'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── RADIOGRAFÍAS ────────────────────────────────────────────────
+function renderRadiografias() {
+  const tbody = document.getElementById('radiografias-tbody');
+  if (state.radiografias.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><i class="ti ti-scan"></i><p style="font-size:12px">Sin radiografías</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.radiografias.map(r => {
+    const p = state.pacientes.find(x => x.id === r.paciente_id) || {};
+    return `<tr>
+      <td class="td-name">${p.nombre||'-'} ${p.apellidos||''}</td>
+      <td>${r.tipo}</td><td>${r.dientes}</td><td>${r.fecha}</td>
+      <td style="max-width:300px;font-size:11.5px;color:var(--muted)">${r.notas||'-'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── CHARTS ──────────────────────────────────────────────────────
+function renderChartFacturacion() {
+  const ctx = document.getElementById('chart-facturacion');
+  if (!ctx) return;
+  if (charts.facturacion) charts.facturacion.destroy();
+
+  const meses = [];
+  const ingresos = [];
+  const ahora = new Date();
+  for (let i=5; i>=0; i--) {
+    const d = new Date(ahora.getFullYear(), ahora.getMonth()-i, 1);
+    const label = d.toLocaleDateString('es-ES',{month:'short'});
+    const m = d.getMonth(); const y = d.getFullYear();
+    const total = state.facturas.filter(f => {
+      const fd = new Date(f.fecha);
+      return fd.getMonth()===m && fd.getFullYear()===y && f.pagada;
+    }).reduce((s,f)=>s+parseFloat(f.importe||0),0);
+    meses.push(label);
+    ingresos.push(total);
+  }
+
+  charts.facturacion = new Chart(ctx, {
+    type:'bar',
+    data:{labels:meses,datasets:[{label:'Ingresos cobrados (€)',data:ingresos,backgroundColor:'rgba(42,124,111,0.7)',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'€'}}}}
+  });
+}
+
+function renderContabilidad() {
+  const total = state.facturas.reduce((s,f)=>s+parseFloat(f.importe||0),0);
+  const pagado = state.facturas.filter(f=>f.pagada).reduce((s,f)=>s+parseFloat(f.importe||0),0);
+  const pendiente = total - pagado;
+  const ticketMedio = state.facturas.length ? total/state.facturas.length : 0;
+
+  document.getElementById('contab-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Facturado total</div><div class="stat-num">${total.toFixed(0)}€</div></div>
+    <div class="stat-card"><div class="stat-label">Cobrado</div><div class="stat-num" style="color:var(--green)">${pagado.toFixed(0)}€</div></div>
+    <div class="stat-card"><div class="stat-label">Pendiente</div><div class="stat-num" style="color:var(--amber)">${pendiente.toFixed(0)}€</div></div>
+    <div class="stat-card"><div class="stat-label">Ticket medio</div><div class="stat-num">${ticketMedio.toFixed(0)}€</div></div>
+  `;
+
+  // Evolución mensual
+  if (charts.evolucion) charts.evolucion.destroy();
+  const meses = [], facturado = [], cobrado = [];
+  const ahora = new Date();
+  for (let i=5; i>=0; i--) {
+    const d = new Date(ahora.getFullYear(), ahora.getMonth()-i, 1);
+    const m = d.getMonth(); const y = d.getFullYear();
+    meses.push(d.toLocaleDateString('es-ES',{month:'short',year:'2-digit'}));
+    const facs = state.facturas.filter(f => { const fd=new Date(f.fecha); return fd.getMonth()===m && fd.getFullYear()===y; });
+    facturado.push(facs.reduce((s,f)=>s+parseFloat(f.importe||0),0));
+    cobrado.push(facs.filter(f=>f.pagada).reduce((s,f)=>s+parseFloat(f.importe||0),0));
+  }
+  charts.evolucion = new Chart(document.getElementById('chart-evolucion'), {
+    type:'line',
+    data:{labels:meses,datasets:[
+      {label:'Facturado',data:facturado,borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,0.1)',tension:.35,fill:true},
+      {label:'Cobrado',data:cobrado,borderColor:'#2A7C6F',backgroundColor:'rgba(42,124,111,0.15)',tension:.35,fill:true}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'€'}}}}
+  });
+
+  // Donut tratamientos
+  if (charts.tratamientos) charts.tratamientos.destroy();
+  const tipos = {};
+  state.facturas.forEach(f => { tipos[f.concepto] = (tipos[f.concepto]||0) + parseFloat(f.importe||0); });
+  const labels = Object.keys(tipos);
+  const vals = Object.values(tipos);
+  charts.tratamientos = new Chart(document.getElementById('chart-tratamientos'), {
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:['#2A7C6F','#A8D5CC','#185FA5','#BA7517','#A32D2D','#1D9E75','#5A7080']}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}
+  });
+
+  // Stacked pagadas vs pendientes
+  if (charts.pagadas) charts.pagadas.destroy();
+  charts.pagadas = new Chart(document.getElementById('chart-pagadas'), {
+    type:'bar',
+    data:{labels:meses,datasets:[
+      {label:'Cobrado',data:cobrado,backgroundColor:'#2A7C6F',borderRadius:3},
+      {label:'Pendiente',data:facturado.map((f,i)=>f-cobrado[i]),backgroundColor:'#BA7517',borderRadius:3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{callback:v=>v+'€'}}}}
+  });
+}
+
+function renderCaptacion() {
+  const nuevos = state.pacientes.filter(p => p.estado === 'nuevo').length;
+  const totalPac = state.pacientes.length;
+  const conversion = totalPac ? Math.round((state.pacientes.filter(p=>['activo','en_tratamiento'].includes(p.estado)).length / totalPac) * 100) : 0;
+  const citasWeb = state.citas.length;
+
+  document.getElementById('capt-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Pacientes nuevos</div><div class="stat-num">${nuevos}</div><div class="stat-meta">este mes</div></div>
+    <div class="stat-card"><div class="stat-label">Citas web recibidas</div><div class="stat-num">${citasWeb}</div><div class="stat-meta">total</div></div>
+    <div class="stat-card"><div class="stat-label">Tasa conversión</div><div class="stat-num">${conversion}%</div><div class="stat-meta">a tratamiento</div></div>
+    <div class="stat-card"><div class="stat-label">Total cartera</div><div class="stat-num">${totalPac}</div></div>
+  `;
+
+  // Nuevos por mes (basado en created_at)
+  if (charts.nuevos) charts.nuevos.destroy();
+  const meses = [], cuentas = [];
+  const ahora = new Date();
+  for (let i=5; i>=0; i--) {
+    const d = new Date(ahora.getFullYear(), ahora.getMonth()-i, 1);
+    meses.push(d.toLocaleDateString('es-ES',{month:'short'}));
+    cuentas.push(state.pacientes.filter(p => {
+      const cd = new Date(p.created_at||0);
+      return cd.getMonth()===d.getMonth() && cd.getFullYear()===d.getFullYear();
+    }).length);
+  }
+  charts.nuevos = new Chart(document.getElementById('chart-nuevos'), {
+    type:'line',
+    data:{labels:meses,datasets:[{label:'Nuevos pacientes',data:cuentas,borderColor:'#2A7C6F',backgroundColor:'rgba(42,124,111,0.15)',tension:.35,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}
+  });
+
+  // Zonas
+  if (charts.zonas) charts.zonas.destroy();
+  const zonas = {};
+  state.pacientes.forEach(p => { const z = p.zona || 'Sin zona'; zonas[z] = (zonas[z]||0) + 1; });
+  charts.zonas = new Chart(document.getElementById('chart-zonas'), {
+    type:'doughnut',
+    data:{labels:Object.keys(zonas),datasets:[{data:Object.values(zonas),backgroundColor:['#2A7C6F','#185FA5','#A8D5CC','#BA7517','#5A7080','#1D9E75']}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}
+  });
+
+  // Recomendaciones
+  const rec = [];
+  if (citasWeb < 5) rec.push({titulo:'Pocas citas web', desc:'Activa Google Ads para "dentista Deusto" y "implantes Bilbao". CPC estimado: 1,80€.', icon:'📈'});
+  if (nuevos < 3) rec.push({titulo:'Capta pacientes nuevos', desc:'Promoción "Primera revisión gratis" en Instagram local de Bilbao.', icon:'🎯'});
+  const zonaTop = Object.entries(zonas).sort((a,b)=>b[1]-a[1])[0];
+  if (zonaTop) rec.push({titulo:`Tu zona fuerte: ${zonaTop[0]}`, desc:`Concentra publicidad geolocalizada en ${zonaTop[0]} y municipios cercanos (radio 5km).`, icon:'📍'});
+  rec.push({titulo:'Programa de referidos', desc:'10% descuento en próximo tratamiento por cada paciente que traiga. Incrementa retención.', icon:'🤝'});
+  rec.push({titulo:'Reseñas Google', desc:'Pide reseña a pacientes satisfechos al terminar. +1 estrella = +30% conversión.', icon:'⭐'});
+
+  document.getElementById('recomendaciones').innerHTML = rec.map(r =>
+    `<div style="display:flex;gap:.75rem;padding:.65rem;background:var(--bg);border-radius:4px">
+      <div style="font-size:20px;flex-shrink:0">${r.icon}</div>
+      <div><div style="font-size:13px;font-weight:600;margin-bottom:2px">${r.titulo}</div><div style="font-size:12px;color:var(--muted);line-height:1.5">${r.desc}</div></div>
+    </div>`).join('');
+}
+
+function renderSistema() {
+  document.getElementById('sistema-stats').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem">
+      <div style="background:var(--bg);padding:.85rem;border-radius:4px"><div style="font-size:20px;font-weight:600">${state.pacientes.length}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:3px">Pacientes</div></div>
+      <div style="background:var(--bg);padding:.85rem;border-radius:4px"><div style="font-size:20px;font-weight:600">${state.facturas.length}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:3px">Facturas</div></div>
+      <div style="background:var(--bg);padding:.85rem;border-radius:4px"><div style="font-size:20px;font-weight:600">${state.tratamientos.length}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:3px">Tratamientos</div></div>
+      <div style="background:var(--bg);padding:.85rem;border-radius:4px"><div style="font-size:20px;font-weight:600">${state.citas.length}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:3px">Citas web</div></div>
+    </div>
+  `;
+}
+
+// ── ACCIONES DEMO / BORRADO ─────────────────────────────────────
+async function cargarDemo() {
+  try {
+    await api('/api/pacientes?action=demo', { method:'POST', body:'{}' });
+    toast('Datos demo cargados');
+    cargarTodo();
+  } catch(e) { toast('Error: '+e.message, 'error'); }
+}
+
+async function borrarDemo() {
+  await borrarTodo();
+}
+
+async function borrarTodo() {
+  try {
+    await api('/api/pacientes?id=all', { method:'DELETE' });
+    await api('/api/citas?id=all', { method:'DELETE' });
+    toast('Todos los datos eliminados');
+    cargarTodo();
+  } catch(e) { toast('Error: '+e.message, 'error'); }
+}
+
+async function refrescar() { await cargarTodo(); toast('Datos actualizados'); }
+
+// ── INICIO ──────────────────────────────────────────────────────
+cargarTodo();
+setInterval(cargarTodo, 30000);
 </script>
 </body>
 </html>
