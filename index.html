@@ -787,7 +787,7 @@ function showPage(id,el){
   document.getElementById('page-'+id).classList.add('active');
   if(el)el.classList.add('active');
   document.getElementById('ttitle').textContent=PT[id]||id;
-  if(id==='agenda')rAgenda();
+  if(id==='agenda'){rAgenda();syncCitasWeb();}
   if(id==='pacientes')rPac();
   if(id==='tratamientos')rTrat();
   if(id==='facturas')rFac();
