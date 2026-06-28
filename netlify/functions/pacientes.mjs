@@ -13,6 +13,8 @@ function json(data, status = 200) {
   });
 }
 
+const COLLECTIONS = ["pacientes","facturas","tratamientos","radiografias"];
+
 export default async (req) => {
   if (req.method === "OPTIONS") return json({}, 200);
 
@@ -20,31 +22,41 @@ export default async (req) => {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
   const action = url.searchParams.get("action");
+  // colección por defecto: pacientes (compat con CRM antiguo)
+  const tipo = url.searchParams.get("tipo") || "pacientes";
   const now = new Date().toISOString();
 
-  // DELETE — borrar paciente individual o todos
-  if (req.method === "DELETE") {
-    if (!id || id === "all") {
-      await s.setJSON("pacientes", []);
-      await s.setJSON("facturas", []);
-      await s.setJSON("tratamientos", []);
-      await s.setJSON("radiografias", []);
-      return json({ ok: true, deleted: "all", mensaje: "Todos los pacientes y datos asociados eliminados" });
-    }
-    const pacientes = (await s.get("pacientes", { type: "json" })) || [];
-    const filtered = pacientes.filter(p => p.id !== id);
-    // Borrar también datos asociados
-    const facturas = ((await s.get("facturas", { type: "json" })) || []).filter(f => f.paciente_id !== id);
-    const tratamientos = ((await s.get("tratamientos", { type: "json" })) || []).filter(t => t.paciente_id !== id);
-    const radiografias = ((await s.get("radiografias", { type: "json" })) || []).filter(r => r.paciente_id !== id);
-    await s.setJSON("pacientes", filtered);
-    await s.setJSON("facturas", facturas);
-    await s.setJSON("tratamientos", tratamientos);
-    await s.setJSON("radiografias", radiografias);
-    return json({ ok: true, deleted: id });
+  if (!COLLECTIONS.includes(tipo)) {
+    return json({ error: `tipo inválido: ${tipo}` }, 400);
   }
 
-  // POST — crear paciente o cargar demo
+  // DELETE
+  if (req.method === "DELETE") {
+    if (!id || id === "all") {
+      if (tipo === "pacientes") {
+        // borrar todo
+        for (const c of COLLECTIONS) await s.setJSON(c, []);
+        return json({ ok: true, deleted: "all" });
+      } else {
+        await s.setJSON(tipo, []);
+        return json({ ok: true, deleted: "all", tipo });
+      }
+    }
+    const items = (await s.get(tipo, { type: "json" })) || [];
+    const filtered = items.filter(x => x.id !== id);
+
+    // Si es paciente, cascada
+    if (tipo === "pacientes") {
+      for (const c of ["facturas","tratamientos","radiografias"]) {
+        const data = ((await s.get(c, { type: "json" })) || []).filter(x => x.paciente_id !== id);
+        await s.setJSON(c, data);
+      }
+    }
+    await s.setJSON(tipo, filtered);
+    return json({ ok: true, deleted: id, tipo });
+  }
+
+  // POST
   if (req.method === "POST") {
     if (action === "demo") {
       const demo = {
@@ -65,55 +77,52 @@ export default async (req) => {
           { id:'f7', paciente_id:'p4', numero:'F-2025-068', fecha:'2025-05-10', concepto:'Primera visita + radiografía', importe:55, pagada:true, created_at:now },
         ],
         tratamientos: [
-          { id:'t1', paciente_id:'p1', tipo:'Implante titanio', diente:'21', estado:'fase_2', inicio:'2025-03-15', fin_previsto:'2025-09-15' },
-          { id:'t2', paciente_id:'p2', tipo:'Invisalign', diente:'Arcada', estado:'en_curso', inicio:'2025-05-15', fin_previsto:'2025-12-17' },
-          { id:'t3', paciente_id:'p3', tipo:'Blanqueamiento LED', diente:'Arcada sup.', estado:'completado', inicio:'2025-06-27', fin_previsto:'2025-06-27' },
-          { id:'t4', paciente_id:'p5', tipo:'Diagnóstico', diente:'-', estado:'programado', inicio:'2025-06-27', fin_previsto:'2025-06-27' },
+          { id:'t1', paciente_id:'p1', tipo:'Implante titanio', diente:'21', estado:'fase_2', inicio:'2025-03-15', fin_previsto:'2025-09-15', notas:'Pilar de cicatrización a las 8 semanas' },
+          { id:'t2', paciente_id:'p2', tipo:'Invisalign', diente:'Arcada completa', estado:'en_curso', inicio:'2025-05-15', fin_previsto:'2025-12-17', notas:'18 alineadores totales, vamos por el 7' },
+          { id:'t3', paciente_id:'p3', tipo:'Blanqueamiento LED', diente:'Arcada superior', estado:'completado', inicio:'2025-06-27', fin_previsto:'2025-06-27', notas:'Resultado A2 → B1' },
+          { id:'t4', paciente_id:'p5', tipo:'Diagnóstico inicial', diente:'-', estado:'programado', inicio:'2025-06-27', fin_previsto:'2025-06-27', notas:'Primera visita' },
         ],
         radiografias: [
-          { id:'r1', paciente_id:'p5', tipo:'Panorámica', dientes:'Arcada completa', fecha:'2025-06-27', notas:'Sin patología visible. Candidata a carillas.' },
-          { id:'r2', paciente_id:'p1', tipo:'Periapical', dientes:'21, 22', fecha:'2025-03-14', notas:'Hueso adecuado para implante. Proceder fase 1.' },
-          { id:'r3', paciente_id:'p4', tipo:'Aleta mordida', dientes:'16, 17, 26, 27', fecha:'2025-06-27', notas:'Caries interproximal leve en 17. Revisar.' },
+          { id:'r1', paciente_id:'p5', tipo:'Panorámica', dientes:'Arcada completa', fecha:'2025-06-27', notas:'Sin patología visible. Candidata a carillas.', archivos:[] },
+          { id:'r2', paciente_id:'p1', tipo:'Periapical', dientes:'21, 22', fecha:'2025-03-14', notas:'Hueso adecuado para implante. Proceder fase 1.', archivos:[] },
+          { id:'r3', paciente_id:'p4', tipo:'Aleta mordida', dientes:'16, 17, 26, 27', fecha:'2025-06-27', notas:'Caries interproximal leve en 17. Revisar.', archivos:[] },
         ]
       };
-      await s.setJSON("pacientes", demo.pacientes);
-      await s.setJSON("facturas", demo.facturas);
-      await s.setJSON("tratamientos", demo.tratamientos);
-      await s.setJSON("radiografias", demo.radiografias);
+      for (const c of COLLECTIONS) await s.setJSON(c, demo[c]);
       return json({ ok: true, mensaje: "Datos demo cargados", counts: { pacientes:5, facturas:7, tratamientos:4, radiografias:3 } });
     }
 
     const body = await req.json();
-    const pacientes = (await s.get("pacientes", { type: "json" })) || [];
+    const items = (await s.get(tipo, { type: "json" })) || [];
     const nuevo = { id: crypto.randomUUID(), ...body, created_at: now };
-    pacientes.push(nuevo);
-    await s.setJSON("pacientes", pacientes);
-    return json({ ok: true, paciente: nuevo }, 201);
+    items.push(nuevo);
+    await s.setJSON(tipo, items);
+    return json({ ok: true, item: nuevo, tipo }, 201);
   }
 
-  // PATCH — actualizar paciente
+  // PATCH
   if (req.method === "PATCH") {
     if (!id) return json({ error: "id requerido" }, 400);
     const body = await req.json();
-    const pacientes = (await s.get("pacientes", { type: "json" })) || [];
-    const idx = pacientes.findIndex(p => p.id === id);
-    if (idx === -1) return json({ error: "paciente no encontrado" }, 404);
-    pacientes[idx] = { ...pacientes[idx], ...body, updated_at: now };
-    await s.setJSON("pacientes", pacientes);
-    return json({ ok: true, paciente: pacientes[idx] });
+    const items = (await s.get(tipo, { type: "json" })) || [];
+    const idx = items.findIndex(x => x.id === id);
+    if (idx === -1) return json({ error: "no encontrado" }, 404);
+    items[idx] = { ...items[idx], ...body, updated_at: now };
+    await s.setJSON(tipo, items);
+    return json({ ok: true, item: items[idx], tipo });
   }
 
-  // GET — listar pacientes, facturas, tratamientos, radiografías
+  // GET
   if (req.method === "GET") {
     if (action === "all") {
-      const pacientes = (await s.get("pacientes", { type: "json" })) || [];
-      const facturas = (await s.get("facturas", { type: "json" })) || [];
-      const tratamientos = (await s.get("tratamientos", { type: "json" })) || [];
-      const radiografias = (await s.get("radiografias", { type: "json" })) || [];
-      return json({ pacientes, facturas, tratamientos, radiografias });
+      const result = {};
+      for (const c of COLLECTIONS) {
+        result[c] = (await s.get(c, { type: "json" })) || [];
+      }
+      return json(result);
     }
-    const pacientes = (await s.get("pacientes", { type: "json" })) || [];
-    return json(pacientes);
+    const items = (await s.get(tipo, { type: "json" })) || [];
+    return json(items);
   }
 
   return json({ error: "Método no permitido" }, 405);
