@@ -813,9 +813,8 @@ function sPtab(el,cid){
 // Formato real: array de {id,nombre,telefono,email,tratamiento,mensaje,estado,created_at}
 const API_CITAS='https://clinica-bigtooth-crm.netlify.app/api/citas';
 
-let _syncing=false;
 async function syncCitasWeb(){
-  if(_syncing)return;_syncing=true;
+  if(syncCitasWeb._busy)return;syncCitasWeb._busy=true;
   const btn=document.getElementById('btn-sync');
   const st=document.getElementById('sync-status');
   if(btn){btn.innerHTML='<i class="ti ti-loader-2"></i> Sync...';btn.disabled=true;}
@@ -854,7 +853,7 @@ async function syncCitasWeb(){
     toast('Error sync: '+e.message,'e');
   }
   if(btn){btn.innerHTML='<i class="ti ti-refresh"></i> Sync web';btn.disabled=false;}
-  _syncing=false;
+  syncCitasWeb._busy=false;
 }
 
 // ── AGENDA ──
