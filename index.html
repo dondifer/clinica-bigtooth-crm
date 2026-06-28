@@ -818,16 +818,14 @@ async function syncCitasWeb(){
   const btn=document.getElementById('btn-sync');
   const st=document.getElementById('sync-status');
   if(btn){btn.innerHTML='<i class="ti ti-loader-2"></i> Sync...';btn.disabled=true;}
-  if(st)st.textContent='Sincronizando...';
   try{
     const res=await fetch(API_CITAS,{signal:AbortSignal.timeout(8000)});
     if(!res.ok)throw new Error('HTTP '+res.status);
-    const citasAPI=await res.json();
-    if(!Array.isArray(citasAPI))throw new Error('Formato inesperado');
-    // Quitar todas las citas de origen Web y reemplazar con las de la API
+    const api=await res.json();
+    if(!Array.isArray(api))throw new Error('Formato inesperado');
+    // Reemplazar todas las citas web con el estado actual de la API
     DB.citas=DB.citas.filter(c=>c.origen!=='Web');
-    citasAPI.forEach(cw=>{
-      if(DB.deletedWebIds.includes(cw.id))return;
+    api.forEach(cw=>{
       const nom=(cw.nombre||'').trim();
       const tel=(cw.telefono||'').replace(/\D/g,'');
       let pac=DB.pacientes.find(p=>tel&&p.tel.replace(/\D/g,'')===tel)||
@@ -844,13 +842,11 @@ async function syncCitasWeb(){
         notas:[cw.mensaje,cw.email].filter(Boolean).join(' · '),origen:'Web'});
     });
     const t=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-    const nWeb=DB.citas.filter(c=>c.origen==='Web').length;
-    if(st)st.textContent=`Sync ${t} · ${nWeb} cita${nWeb!==1?'s':''} web / ${citasAPI.length} en API`;
-    updKPIs();rAgenda();
-    toast('Agenda sincronizada','s');
+    const n=DB.citas.filter(c=>c.origen==='Web').length;
+    if(st)st.textContent=`Sync ${t} · ${n} cita${n!==1?'s':''} web`;
+    updKPIs();rAgenda();toast('Sincronizado','s');
   }catch(e){
-    if(st)st.textContent='Error: '+e.message;
-    toast('Error sync: '+e.message,'e');
+    if(st)st.textContent='Error: '+e.message;toast('Error: '+e.message,'e');
   }
   if(btn){btn.innerHTML='<i class="ti ti-refresh"></i> Sync web';btn.disabled=false;}
   syncCitasWeb._busy=false;
@@ -921,10 +917,7 @@ function guardarEditCita(){
 function elimCita(id){
   const c=DB.citas.find(c=>c.id===id);if(!c)return;
   confirmar('Eliminar cita',`¿Eliminar la cita de ${gPac(c.pacienteId).nombre}?`,()=>{
-    if(c.webId){
-      DB.deletedWebIds.push(c.webId);
-      fetch(API_CITAS+'?id='+c.webId,{method:'DELETE'}).catch(()=>{});
-    }
+    if(c.webId)fetch(API_CITAS+'?id='+c.webId,{method:'DELETE'}).catch(()=>{});
     DB.citas=DB.citas.filter(c=>c.id!==id);rAgenda();updKPIs();toast('Cita eliminada','s');
   });
 }
