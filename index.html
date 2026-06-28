@@ -668,7 +668,7 @@ function doLogin(){
 }
 function doLogout(){CU=null;sessionStorage.removeItem('bt_user');document.body.classList.remove('is-admin');document.getElementById('login-screen').style.display='flex';document.getElementById('app').classList.remove('visible');}
 // Restaurar sesión al recargar
-(function(){const u=sessionStorage.getItem('bt_user');if(u&&USERS[u]){applyUser(u);initApp();}})();
+
 
 // ── DB ──
 var DB={
@@ -1262,6 +1262,7 @@ function initApp(){
     <div class="ai"><div class="aico" style="background:var(--ys)"><i class="ti ti-tooth" style="color:var(--yellow);font-size:13px"></i></div><div class="atx"><strong>Tratamiento iniciado</strong><p>Leire Iturriaga · Ortodoncia</p></div><span class="atm">Ayer</span></div>`;
   // sync solo al navegar a agenda, no al arrancar
 }
+(function(){var u=sessionStorage.getItem("bt_user");if(u&&USERS[u]){applyUser(u);initApp();}})();
 </script>
 </body>
 </html>
