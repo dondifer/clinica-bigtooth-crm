@@ -13,7 +13,8 @@ function json(data, status = 200) {
   });
 }
 
-const COLLECTIONS = ["pacientes","facturas","tratamientos","radiografias"];
+// Tipos válidos
+const TIPOS = ["pacientes", "facturas", "tratamientos", "radiografias"];
 
 export default async (req) => {
   if (req.method === "OPTIONS") return json({}, 200);
@@ -22,42 +23,36 @@ export default async (req) => {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
   const action = url.searchParams.get("action");
-  // colección por defecto: pacientes (compat con CRM antiguo)
   const tipo = url.searchParams.get("tipo") || "pacientes";
   const now = new Date().toISOString();
 
-  if (!COLLECTIONS.includes(tipo)) {
-    return json({ error: `tipo inválido: ${tipo}` }, 400);
-  }
+  if (!TIPOS.includes(tipo)) return json({ error: "tipo inválido" }, 400);
 
-  // DELETE
+  // ── DELETE ──
   if (req.method === "DELETE") {
+    // Borrar todo (todos los tipos)
     if (!id || id === "all") {
-      if (tipo === "pacientes") {
-        // borrar todo
-        for (const c of COLLECTIONS) await s.setJSON(c, []);
-        return json({ ok: true, deleted: "all" });
-      } else {
-        await s.setJSON(tipo, []);
-        return json({ ok: true, deleted: "all", tipo });
-      }
+      for (const t of TIPOS) await s.setJSON(t, []);
+      return json({ ok: true, deleted: "all" });
     }
-    const items = (await s.get(tipo, { type: "json" })) || [];
-    const filtered = items.filter(x => x.id !== id);
-
-    // Si es paciente, cascada
-    if (tipo === "pacientes") {
-      for (const c of ["facturas","tratamientos","radiografias"]) {
-        const data = ((await s.get(c, { type: "json" })) || []).filter(x => x.paciente_id !== id);
-        await s.setJSON(c, data);
-      }
-    }
+    // Borrar item del tipo indicado
+    const data = (await s.get(tipo, { type: "json" })) || [];
+    const filtered = data.filter(x => x.id !== id);
     await s.setJSON(tipo, filtered);
-    return json({ ok: true, deleted: id, tipo });
+
+    // Si es paciente, cascada — borrar sus datos asociados
+    if (tipo === "pacientes") {
+      for (const t of ["facturas", "tratamientos", "radiografias"]) {
+        const items = ((await s.get(t, { type: "json" })) || []).filter(x => x.paciente_id !== id);
+        await s.setJSON(t, items);
+      }
+    }
+    return json({ ok: true, deleted: id });
   }
 
-  // POST
+  // ── POST ──
   if (req.method === "POST") {
+    // Cargar demo
     if (action === "demo") {
       const demo = {
         pacientes: [
@@ -77,10 +72,10 @@ export default async (req) => {
           { id:'f7', paciente_id:'p4', numero:'F-2025-068', fecha:'2025-05-10', concepto:'Primera visita + radiografía', importe:55, pagada:true, created_at:now },
         ],
         tratamientos: [
-          { id:'t1', paciente_id:'p1', tipo:'Implante titanio', diente:'21', estado:'fase_2', inicio:'2025-03-15', fin_previsto:'2025-09-15', notas:'Pilar de cicatrización a las 8 semanas' },
-          { id:'t2', paciente_id:'p2', tipo:'Invisalign', diente:'Arcada completa', estado:'en_curso', inicio:'2025-05-15', fin_previsto:'2025-12-17', notas:'18 alineadores totales, vamos por el 7' },
-          { id:'t3', paciente_id:'p3', tipo:'Blanqueamiento LED', diente:'Arcada superior', estado:'completado', inicio:'2025-06-27', fin_previsto:'2025-06-27', notas:'Resultado A2 → B1' },
-          { id:'t4', paciente_id:'p5', tipo:'Diagnóstico inicial', diente:'-', estado:'programado', inicio:'2025-06-27', fin_previsto:'2025-06-27', notas:'Primera visita' },
+          { id:'t1', paciente_id:'p1', tipo:'Implante titanio', diente:'21', estado:'fase_2', inicio:'2025-03-15', fin_previsto:'2025-09-15', notas:'Osteointegración correcta. Pendiente corona.' },
+          { id:'t2', paciente_id:'p2', tipo:'Invisalign', diente:'Arcada', estado:'en_curso', inicio:'2025-05-15', fin_previsto:'2025-12-17', notas:'Aligner 12 de 24.' },
+          { id:'t3', paciente_id:'p3', tipo:'Blanqueamiento LED', diente:'Arcada sup.', estado:'completado', inicio:'2025-06-27', fin_previsto:'2025-06-27', notas:'Resultado excelente. Recomendar mantenimiento anual.' },
+          { id:'t4', paciente_id:'p5', tipo:'Diagnóstico', diente:'-', estado:'programado', inicio:'2025-06-27', fin_previsto:'2025-06-27', notas:'Primera visita programada.' },
         ],
         radiografias: [
           { id:'r1', paciente_id:'p5', tipo:'Panorámica', dientes:'Arcada completa', fecha:'2025-06-27', notas:'Sin patología visible. Candidata a carillas.', archivos:[] },
@@ -88,41 +83,41 @@ export default async (req) => {
           { id:'r3', paciente_id:'p4', tipo:'Aleta mordida', dientes:'16, 17, 26, 27', fecha:'2025-06-27', notas:'Caries interproximal leve en 17. Revisar.', archivos:[] },
         ]
       };
-      for (const c of COLLECTIONS) await s.setJSON(c, demo[c]);
-      return json({ ok: true, mensaje: "Datos demo cargados", counts: { pacientes:5, facturas:7, tratamientos:4, radiografias:3 } });
+      for (const t of TIPOS) await s.setJSON(t, demo[t]);
+      return json({ ok: true, mensaje: "Datos demo cargados" });
     }
 
+    // Crear item (paciente, factura, tratamiento o radiografía)
     const body = await req.json();
-    const items = (await s.get(tipo, { type: "json" })) || [];
+    const data = (await s.get(tipo, { type: "json" })) || [];
     const nuevo = { id: crypto.randomUUID(), ...body, created_at: now };
-    items.push(nuevo);
-    await s.setJSON(tipo, items);
-    return json({ ok: true, item: nuevo, tipo }, 201);
+    if (tipo === "radiografias" && !nuevo.archivos) nuevo.archivos = [];
+    data.push(nuevo);
+    await s.setJSON(tipo, data);
+    return json({ ok: true, item: nuevo }, 201);
   }
 
-  // PATCH
+  // ── PATCH ──
   if (req.method === "PATCH") {
     if (!id) return json({ error: "id requerido" }, 400);
     const body = await req.json();
-    const items = (await s.get(tipo, { type: "json" })) || [];
-    const idx = items.findIndex(x => x.id === id);
-    if (idx === -1) return json({ error: "no encontrado" }, 404);
-    items[idx] = { ...items[idx], ...body, updated_at: now };
-    await s.setJSON(tipo, items);
-    return json({ ok: true, item: items[idx], tipo });
+    const data = (await s.get(tipo, { type: "json" })) || [];
+    const idx = data.findIndex(x => x.id === id);
+    if (idx === -1) return json({ error: "item no encontrado" }, 404);
+    data[idx] = { ...data[idx], ...body, updated_at: now };
+    await s.setJSON(tipo, data);
+    return json({ ok: true, item: data[idx] });
   }
 
-  // GET
+  // ── GET ──
   if (req.method === "GET") {
     if (action === "all") {
       const result = {};
-      for (const c of COLLECTIONS) {
-        result[c] = (await s.get(c, { type: "json" })) || [];
-      }
+      for (const t of TIPOS) result[t] = (await s.get(t, { type: "json" })) || [];
       return json(result);
     }
-    const items = (await s.get(tipo, { type: "json" })) || [];
-    return json(items);
+    const data = (await s.get(tipo, { type: "json" })) || [];
+    return json(data);
   }
 
   return json({ error: "Método no permitido" }, 405);
