@@ -711,7 +711,7 @@ var DB={
     {id:5,pacienteId:6,tipo:'Panorámica',   fecha:'2026-03-01',doctor:'Dra. Eider Landa', notas:'Piezas ausentes 35,36,37.',  archivo:null},
     {id:6,pacienteId:4,tipo:'Periapical',   fecha:'2026-06-25',doctor:'Dr. Iñigo Mendoza',notas:'Molar 48 impactado.',        archivo:null},
   ],
-  nFac:7,nTrat:7,nRx:7,nPac:7,nCita:7
+  nFac:7,nTrat:7,nRx:7,nPac:7,nCita:7,deletedWebIds:[]
 };
 var CH={};
 
@@ -827,6 +827,7 @@ async function syncCitasWeb(){
     let nuevas=0;
     citas.forEach(cw=>{
       if(DB.citas.find(c=>c.webId===cw.id))return;
+      if(DB.deletedWebIds.includes(cw.id))return;
       const nom=(cw.nombre||'').trim();
       const tel=(cw.telefono||'').replace(/\D/g,'');
       let pac=DB.pacientes.find(p=>tel&&p.tel.replace(/\D/g,'')===tel)||
@@ -921,6 +922,7 @@ function guardarEditCita(){
 function elimCita(id){
   const c=DB.citas.find(c=>c.id===id);if(!c)return;
   confirmar('Eliminar cita',`¿Eliminar la cita de ${gPac(c.pacienteId).nombre} el ${fd(c.fecha)} a las ${c.hora}?`,()=>{
+    if(c.webId)DB.deletedWebIds.push(c.webId);
     DB.citas=DB.citas.filter(c=>c.id!==id);rAgenda();updKPIs();toast('Cita eliminada','s');
   });
 }
