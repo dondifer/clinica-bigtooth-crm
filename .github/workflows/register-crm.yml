@@ -1,43 +1,59 @@
-name: Registrar cliente en CRM WebAgency
+name: Registrar BigTooth CRM en WebAgency
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   register:
     runs-on: ubuntu-latest
     steps:
-      - name: Registrar CRM BigTooth en CRM interno
+      - name: Registrar CRM BigTooth en CRM interno WebAgency
         run: |
-          curl -s -X POST "https://webagency-bilbao-crm.netlify.app/api/proxy?action=onboarding" \
-            -H "Content-Type: application/json" \
-            -H "x-proxy-secret: wab-proxy-2025" \
-            -d '{
-              "cliente": {
-                "nombre": "Clínica BigTooth",
-                "sector": "dental",
-                "zona": "Deusto, Bilbao",
-                "email": "info@bigtooth.es",
-                "telefono": "+34 944 123 456",
-                "plan": "premium",
-                "url_web": "https://clinica-bigtooth.netlify.app",
-                "url_crm": "https://clinica-bigtooth-crm.netlify.app",
-                "repo_github": "https://github.com/dondifer/clinica-bigtooth-crm",
-                "notas": "Ecosistema Premium — CRM dental. Módulos: pacientes, agenda, tratamientos, presupuestos, facturas, radiografías."
-              },
-              "proyecto": {
-                "nombre": "Ecosistema Premium BigTooth",
-                "tipo": "Ecosistema Premium",
-                "valor": 1800,
-                "fecha_entrega": "2025-06-27",
-                "notas": "CRM dental HTML completo. Navegación SPA, modales, datos ficticios realistas Bilbao."
-              }
-            }' | python3 -c "
-          import sys, json
-          d = json.load(sys.stdin)
-          if d.get('ok'):
-              print('✅', d.get('mensaje', 'Registrado'))
-          else:
-              print('⚠️ Ya registrado o error:', d)
-          "
+          python3 << 'PYEOF'
+          import urllib.request, json, sys
+
+          payload = {
+            "cliente": {
+              "nombre": "Clinica BigTooth",
+              "sector": "dental",
+              "zona": "Deusto, Bilbao",
+              "email": "info@bigtooth.es",
+              "telefono": "+34 944 123 456",
+              "plan": "premium",
+              "url_web": "https://clinica-bigtooth.netlify.app",
+              "url_crm": "https://clinica-bigtooth-crm.netlify.app",
+              "repo_github": "https://github.com/dondifer/clinica-bigtooth-crm",
+              "notas": "Ecosistema Premium completo. Web + CRM dental conectados via /api/citas. QA 8.4/10."
+            },
+            "proyecto": {
+              "nombre": "Ecosistema Premium BigTooth",
+              "tipo": "Ecosistema Premium",
+              "valor": 1800,
+              "fecha_entrega": "2025-06-27",
+              "notas": "Web HTML React, CRM dental SPA con API real de citas, schema Supabase 7 tablas."
+            }
+          }
+
+          data = json.dumps(payload).encode('utf-8')
+          req = urllib.request.Request(
+            'https://webagency-bilbao-crm.netlify.app/api/onboarding',
+            data=data,
+            headers={'Content-Type': 'application/json'},
+            method='POST'
+          )
+          try:
+            with urllib.request.urlopen(req, timeout=15) as r:
+              resp = json.loads(r.read().decode('utf-8'))
+              if resp.get('ok'):
+                c = resp.get('cliente', {})
+                print("=== REGISTRADO OK ===")
+                print(f"Cliente: {c.get('nombre')} | ID: {c.get('id')}")
+                print(f"Plan: {c.get('plan')} | Zona: {c.get('zona')}")
+              else:
+                print("Respuesta inesperada:", resp)
+          except Exception as e:
+            print(f"ERROR: {e}")
+            sys.exit(1)
+          PYEOF
