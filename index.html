@@ -818,14 +818,16 @@ async function syncCitasWeb(){
   if(_syncing)return;_syncing=true;
   const btn=document.getElementById('btn-sync');
   const st=document.getElementById('sync-status');
-  btn.innerHTML='<i class="ti ti-loader-2"></i> Sync...';btn.disabled=true;
+  if(btn){btn.innerHTML='<i class="ti ti-loader-2"></i> Sync...';btn.disabled=true;}
+  if(st)st.textContent='Sincronizando...';
   try{
     const res=await fetch(API_CITAS,{signal:AbortSignal.timeout(8000)});
     if(!res.ok)throw new Error('HTTP '+res.status);
-    const citas=await res.json(); // array directo
+    const citas=await res.json();
+    if(!Array.isArray(citas))throw new Error('Respuesta no válida: '+JSON.stringify(citas).slice(0,100));
     let nuevas=0;
     citas.forEach(cw=>{
-      if(DB.citas.find(c=>c.webId===cw.id))return; // ya importada
+      if(DB.citas.find(c=>c.webId===cw.id))return;
       const nom=(cw.nombre||'').trim();
       const tel=(cw.telefono||'').replace(/\D/g,'');
       let pac=DB.pacientes.find(p=>tel&&p.tel.replace(/\D/g,'')===tel)||
@@ -843,14 +845,16 @@ async function syncCitasWeb(){
       nuevas++;
     });
     const t=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-    st.textContent=`Sync ${t} · ${nuevas} nueva${nuevas!==1?'s':''} / ${citas.length} total`;
+    if(st)st.textContent=`Sync ${t} · ${nuevas} nueva${nuevas!==1?'s':''} / ${citas.length} total`;
     updKPIs();rAgenda();
-    if(nuevas>0){toast(`${nuevas} cita${nuevas>1?'s':''} nueva${nuevas>1?'s':''} desde la web`,'i');addAct('ti-world','#ede9fe','#7c3aed','Citas web',`${nuevas} nueva${nuevas>1?'s':''}`);}
-    else toast('Sin citas nuevas','s');
+    if(nuevas>0){toast(`${nuevas} cita${nuevas>1?'s':''} web importada${nuevas>1?'s':''}`,'i');addAct('ti-world','#ede9fe','#7c3aed','Citas web',`${nuevas} nueva${nuevas>1?'s':''}`);}
+    else toast('Agenda al día','s');
   }catch(e){
-    st.textContent='Error: '+e.message;toast('Error al sincronizar','e');
+    if(st)st.textContent='Error: '+e.message;
+    toast('Error sync: '+e.message,'e');
   }
-  btn.innerHTML='<i class="ti ti-refresh"></i> Sync web';btn.disabled=false;_syncing=false;
+  if(btn){btn.innerHTML='<i class="ti ti-refresh"></i> Sync web';btn.disabled=false;}
+  _syncing=false;
 }
 
 // ── AGENDA ──
