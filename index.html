@@ -647,7 +647,7 @@ body.is-admin .admin-block{display:block}
 <script>
 // ── AUTH ──
 const USERS={admin:{pass:'admin123',role:'admin',name:'Dr. Admin',init:'DA'},recepcion:{pass:'rec123',role:'employee',name:'Recepción',init:'R'}};
-let CU=null;
+var CU=null;
 function applyUser(u){
   CU=USERS[u];document.body.classList.toggle('is-admin',CU.role==='admin');
   document.getElementById('login-screen').style.display='none';
@@ -671,7 +671,7 @@ function doLogout(){CU=null;sessionStorage.removeItem('bt_user');document.body.c
 (function(){const u=sessionStorage.getItem('bt_user');if(u&&USERS[u]){applyUser(u);initApp();}})();
 
 // ── DB ──
-const DB={
+var DB={
   pacientes:[
     {id:1,nombre:'Ane Txakartegi Iturri',   dni:'72345678A',tel:'+34 666 112 233',email:'ane@gmail.com',zona:'Deusto',dir:'C/ Gran Vía 45',fnac:'1985-03-15',alg:'Ninguna',med:'Ninguna',obs:'Paciente habitual.',estado:'Activo',ca:'2025-01-10'},
     {id:2,nombre:'Mikel Garate Uriarte',     dni:'16234567B',tel:'+34 644 223 344',email:'mikel@hotmail.com',zona:'Bilbao',dir:'Av. Lehendakari Agirre 23',fnac:'1990-07-22',alg:'Penicilina',med:'Ninguna',obs:'Ortodoncia en curso.',estado:'En tratamiento',ca:'2025-03-05'},
@@ -713,7 +713,7 @@ const DB={
   ],
   nFac:7,nTrat:7,nRx:7,nPac:7,nCita:7
 };
-const CH={};
+var CH={};
 
 // ── HELPERS ──
 const gPac =(id)=>DB.pacientes.find(p=>p.id===id)||{nombre:'—'};
@@ -732,7 +732,7 @@ function toast(msg,t='s'){
   setTimeout(()=>el.style.opacity='0',2600);setTimeout(()=>el.remove(),3000);
 }
 
-let _cb=null;
+var _cb=null;
 function confirmar(tit,msg,cb,lbl='Eliminar'){
   document.getElementById('ctitle').textContent=tit;document.getElementById('cmsg').textContent=msg;
   document.getElementById('cok').textContent=lbl;_cb=cb;document.getElementById('cov').classList.add('open');
@@ -780,7 +780,7 @@ function poblarSels(){
 }
 
 // ── NAVEGACIÓN ──
-const PT={dashboard:'Dashboard',agenda:'Agenda',pacientes:'Pacientes',tratamientos:'Tratamientos',radiografias:'Radiografías',facturas:'Facturas',contabilidad:'Contabilidad',captacion:'Captación',ajustes:'Ajustes'};
+var PT={dashboard:'Dashboard',agenda:'Agenda',pacientes:'Pacientes',tratamientos:'Tratamientos',radiografias:'Radiografías',facturas:'Facturas',contabilidad:'Contabilidad',captacion:'Captación',ajustes:'Ajustes'};
 function showPage(id,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sbi').forEach(i=>i.classList.remove('active'));
@@ -811,7 +811,7 @@ function sPtab(el,cid){
 // ── SYNC CITAS WEB ──
 // API en el propio CRM (clinica-bigtooth-crm.netlify.app/api/citas)
 // Formato real: array de {id,nombre,telefono,email,tratamiento,mensaje,estado,created_at}
-const API_CITAS='https://clinica-bigtooth-crm.netlify.app/api/citas';
+var API_CITAS='https://clinica-bigtooth-crm.netlify.app/api/citas';
 
 async function syncCitasWeb(){
   if(syncCitasWeb._busy)return;syncCitasWeb._busy=true;
