@@ -813,7 +813,9 @@ function sPtab(el,cid){
 // Formato real: array de {id,nombre,telefono,email,tratamiento,mensaje,estado,created_at}
 const API_CITAS='https://clinica-bigtooth-crm.netlify.app/api/citas';
 
+let _syncing=false;
 async function syncCitasWeb(){
+  if(_syncing)return;_syncing=true;
   const btn=document.getElementById('btn-sync');
   const st=document.getElementById('sync-status');
   btn.innerHTML='<i class="ti ti-loader-2"></i> Sync...';btn.disabled=true;
@@ -848,7 +850,7 @@ async function syncCitasWeb(){
   }catch(e){
     st.textContent='Error: '+e.message;toast('Error al sincronizar','e');
   }
-  btn.innerHTML='<i class="ti ti-refresh"></i> Sync web';btn.disabled=false;
+  btn.innerHTML='<i class="ti ti-refresh"></i> Sync web';btn.disabled=false;_syncing=false;
 }
 
 // ── AGENDA ──
@@ -1255,8 +1257,7 @@ function initApp(){
     <div class="ai"><div class="aico" style="background:var(--gs)"><i class="ti ti-receipt" style="color:var(--green);font-size:13px"></i></div><div class="atx"><strong>Factura pagada</strong><p>Ane Txakartegi · 320€</p></div><span class="atm">Hace 1h</span></div>
     <div class="ai"><div class="aico" style="background:var(--bs)"><i class="ti ti-scan" style="color:var(--blue);font-size:13px"></i></div><div class="atx"><strong>Radiografía subida</strong><p>Mikel Garate · Panorámica</p></div><span class="atm">Hace 2h</span></div>
     <div class="ai"><div class="aico" style="background:var(--ys)"><i class="ti ti-tooth" style="color:var(--yellow);font-size:13px"></i></div><div class="atx"><strong>Tratamiento iniciado</strong><p>Leire Iturriaga · Ortodoncia</p></div><span class="atm">Ayer</span></div>`;
-  // Auto-sync citas web al entrar
-  setTimeout(syncCitasWeb, 1500);
+  // sync solo al navegar a agenda, no al arrancar
 }
 </script>
 </body>
