@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BigTooth CRM · Clínica Dental</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -13,1517 +14,1265 @@
   --t1:#1a1f2e;--t2:#6b7280;--t3:#9ca3af;
   --bd:rgba(0,0,0,0.08);--bd2:rgba(0,0,0,0.15);
   --r:8px;--rl:12px;
-  --green:#059669;--green-soft:#d1fae5;
-  --red:#dc2626;--red-soft:#fee2e2;
-  --yellow:#d97706;--yellow-soft:#fef3c7;
-  --blue:#2563eb;--blue-soft:#dbeafe;
-  --sidebar:220px;
+  --green:#059669;--gs:#d1fae5;
+  --red:#dc2626;--rs:#fee2e2;
+  --yellow:#d97706;--ys:#fef3c7;
+  --blue:#2563eb;--bs:#dbeafe;
+  --sw:224px;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--t1);background:var(--bg2);height:100vh;overflow:hidden}
 
-/* ─── LOGIN ─── */
-#login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0f1b2d 0%,#1a3a5c 50%,#1a7fd4 100%);display:flex;align-items:center;justify-content:center;z-index:9999}
-.login-box{background:white;border-radius:16px;padding:2.5rem;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.4)}
-.login-logo{text-align:center;margin-bottom:1.5rem}
-.login-logo .logo-icon{width:56px;height:56px;background:var(--acc);border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px}
-.login-logo .logo-icon i{font-size:28px;color:white}
-.login-logo h1{font-size:20px;font-weight:700;color:var(--t1)}
-.login-logo p{font-size:12px;color:var(--t2);margin-top:2px}
-.login-field{margin-bottom:14px}
-.login-field label{display:block;font-size:11px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
-.login-field input{width:100%;padding:10px 12px;border:1px solid var(--bd2);border-radius:var(--r);font-size:14px;font-family:inherit;outline:none;transition:.15s}
-.login-field input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,127,212,.15)}
-.login-btn{width:100%;padding:11px;background:var(--acc);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;margin-top:4px}
-.login-btn:hover{background:var(--acc2)}
-.login-error{display:none;background:var(--red-soft);color:var(--red);font-size:12px;padding:8px 10px;border-radius:6px;margin-bottom:12px}
-.login-error.show{display:block}
-.login-hint{margin-top:16px;font-size:11px;color:var(--t3);text-align:center}
-.login-hint code{background:var(--bg3);padding:2px 5px;border-radius:4px;font-size:10px}
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0f1b2d,#1a3a5c,#1a7fd4);display:flex;align-items:center;justify-content:center;z-index:9999}
+.lbox{background:white;border-radius:16px;padding:2.5rem;width:360px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.llogo{text-align:center;margin-bottom:1.5rem}
+.llogo .li{width:56px;height:56px;background:var(--acc);border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px}
+.llogo .li i{font-size:28px;color:white}
+.llogo h1{font-size:20px;font-weight:700}
+.llogo p{font-size:12px;color:var(--t2);margin-top:2px}
+.lf{margin-bottom:14px}
+.lf label{display:block;font-size:11px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.lf input{width:100%;padding:10px 12px;border:1px solid var(--bd2);border-radius:var(--r);font-size:14px;font-family:inherit;outline:none;transition:.15s}
+.lf input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,127,212,.15)}
+.lbtn{width:100%;padding:11px;background:var(--acc);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px}
+.lbtn:hover{background:var(--acc2)}
+.lerr{display:none;background:var(--rs);color:var(--red);font-size:12px;padding:8px 10px;border-radius:6px;margin-bottom:12px}
+.lerr.show{display:block}
+.lhint{margin-top:14px;font-size:11px;color:var(--t3);text-align:center;line-height:1.9}
+.lhint code{background:var(--bg3);padding:2px 5px;border-radius:4px;font-size:10px}
 
-/* ─── APP ─── */
+/* APP */
 #app{display:none;height:100vh;flex-direction:column}
 #app.visible{display:flex}
 
 /* TOPBAR */
 .topbar{height:52px;background:var(--bg1);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 1.2rem;gap:12px;flex-shrink:0}
-.topbar-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:var(--t1);min-width:var(--sidebar);padding-right:1rem}
-.topbar-logo .logo-dot{width:28px;height:28px;background:var(--acc);border-radius:7px;display:flex;align-items:center;justify-content:center}
-.topbar-logo .logo-dot i{font-size:15px;color:white}
-.topbar-title{flex:1;font-size:14px;font-weight:600;color:var(--t1)}
-.topbar-right{display:flex;align-items:center;gap:10px}
-.role-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
-.role-badge.admin{background:#fef3c7;color:#92400e}
-.role-badge.employee{background:var(--blue-soft);color:var(--blue)}
-.user-btn{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:20px;border:1px solid var(--bd);background:transparent;cursor:pointer;font-size:12px;color:var(--t2);font-family:inherit}
-.user-btn:hover{background:var(--bg2)}
-.user-avatar{width:26px;height:26px;background:var(--acc);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700}
+.tlogo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;min-width:var(--sw);padding-right:1rem}
+.ldot{width:28px;height:28px;background:var(--acc);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.ldot i{font-size:15px;color:white}
+.ttitle{flex:1;font-size:14px;font-weight:600}
+.tright{display:flex;align-items:center;gap:10px}
+.rbadge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
+.rba{background:var(--ys);color:#92400e}
+.rbe{background:var(--bs);color:var(--blue)}
+.ubtn{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:20px;border:1px solid var(--bd);background:transparent;cursor:pointer;font-size:12px;color:var(--t2);font-family:inherit}
+.ubtn:hover{background:var(--bg2)}
+.uav{width:26px;height:26px;background:var(--acc);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700}
 
 /* LAYOUT */
-.app-body{flex:1;display:flex;overflow:hidden}
-
-/* SIDEBAR */
-.sidebar{width:var(--sidebar);background:var(--bg1);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
-.sb-section{padding:.9rem .8rem .3rem;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3)}
-.sb-item{display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px .5rem;border-radius:6px;cursor:pointer;transition:.1s;color:var(--t2);font-size:13px;font-weight:500;border:none;background:transparent;width:calc(100% - 1rem);text-align:left;font-family:inherit}
-.sb-item i{font-size:16px;flex-shrink:0}
-.sb-item:hover{background:var(--bg2);color:var(--t1)}
-.sb-item.active{background:var(--acc-soft);color:var(--acc);font-weight:600}
-.sb-item .badge-count{margin-left:auto;background:var(--red);color:white;font-size:10px;font-weight:700;padding:1px 5px;border-radius:10px;min-width:18px;text-align:center}
-.sb-footer{margin-top:auto;padding:.8rem;border-top:1px solid var(--bd)}
+.abody{flex:1;display:flex;overflow:hidden}
+.sidebar{width:var(--sw);background:var(--bg1);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.sbs{padding:.85rem .8rem .25rem;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3)}
+.sbi{display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px .5rem;border-radius:6px;cursor:pointer;transition:.1s;color:var(--t2);font-size:13px;font-weight:500;border:none;background:transparent;width:calc(100% - 1rem);text-align:left;font-family:inherit}
+.sbi i{font-size:16px;flex-shrink:0}
+.sbi:hover{background:var(--bg2);color:var(--t1)}
+.sbi.active{background:var(--acc-soft);color:var(--acc);font-weight:600}
+.sbb{margin-left:auto;background:var(--red);color:white;font-size:10px;font-weight:700;padding:1px 5px;border-radius:10px;min-width:18px;text-align:center}
+.sbfoot{margin-top:auto;padding:.8rem;border-top:1px solid var(--bd)}
 
 /* MAIN */
 .main{flex:1;overflow-y:auto;padding:1.4rem}
 .page{display:none}
 .page.active{display:block}
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
-.page-header h2{font-size:18px;font-weight:700}
-.page-header .actions{display:flex;gap:8px}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;gap:12px;flex-wrap:wrap}
+.ph h2{font-size:18px;font-weight:700}
+.pa{display:flex;gap:8px;flex-wrap:wrap}
 
-/* CARDS / GRID */
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.2rem}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.2rem}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.2rem}
-.kpi{background:var(--bg1);border:1px solid var(--bd);border-radius:var(--rl);padding:1.1rem 1.2rem}
-.kpi-label{font-size:11px;color:var(--t2);font-weight:500;margin-bottom:4px}
-.kpi-val{font-size:22px;font-weight:700;color:var(--t1)}
-.kpi-sub{font-size:11px;color:var(--t3);margin-top:3px}
-.kpi-sub.green{color:var(--green)}
-.kpi-sub.red{color:var(--red)}
-.kpi-sub.yellow{color:var(--yellow)}
+/* GRIDS */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.2rem}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.2rem}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.2rem}
+
+/* KPI */
+.kpi{background:var(--bg1);border:1px solid var(--bd);border-radius:var(--rl);padding:1rem 1.2rem}
+.kpi-l{font-size:11px;color:var(--t2);font-weight:500;margin-bottom:4px}
+.kpi-v{font-size:22px;font-weight:700}
+.kpi-s{font-size:11px;color:var(--t3);margin-top:3px}
+.kg{color:var(--green)}.kr{color:var(--red)}.ky{color:var(--yellow)}
 
 /* CARD */
 .card{background:var(--bg1);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;margin-bottom:1.2rem}
-.card-header{padding:.9rem 1.1rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
-.card-header h3{font-size:13px;font-weight:600}
-.card-body{padding:0}
+.ch{padding:.85rem 1.1rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.ch h3{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.cw{position:relative;height:230px;padding:1rem}
 
-/* TABLES */
+/* TABLE */
 table{width:100%;border-collapse:collapse}
 th{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;padding:9px 12px;background:var(--bg2);border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
-td{padding:10px 12px;border-bottom:1px solid var(--bd);font-size:13px;vertical-align:middle}
+td{padding:9px 12px;border-bottom:1px solid var(--bd);font-size:13px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--bg2)}
-.td-link{color:var(--acc);cursor:pointer;font-weight:500}
-.td-link:hover{text-decoration:underline}
+.tl{color:var(--acc);cursor:pointer;font-weight:500}
+.tl:hover{text-decoration:underline}
 
 /* BADGES */
 .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap}
-.badge-green{background:var(--green-soft);color:var(--green)}
-.badge-red{background:var(--red-soft);color:var(--red)}
-.badge-yellow{background:var(--yellow-soft);color:var(--yellow)}
-.badge-blue{background:var(--blue-soft);color:var(--blue)}
-.badge-gray{background:var(--bg3);color:var(--t2)}
+.bg2{background:var(--gs);color:var(--green)}
+.br2{background:var(--rs);color:var(--red)}
+.by2{background:var(--ys);color:var(--yellow)}
+.bb2{background:var(--bs);color:var(--blue)}
+.bgr2{background:var(--bg3);color:var(--t2)}
 
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg1);cursor:pointer;font-size:13px;color:var(--t1);transition:.1s;font-family:inherit;font-weight:500;white-space:nowrap}
 .btn:hover{background:var(--bg2)}
-.btn-primary{background:var(--acc);color:white;border-color:var(--acc)}
-.btn-primary:hover{background:var(--acc2);border-color:var(--acc2)}
-.btn-danger{background:var(--red);color:white;border-color:var(--red)}
-.btn-danger:hover{background:#b91c1c;border-color:#b91c1c}
-.btn-sm{padding:4px 9px;font-size:12px}
-.btn-icon{padding:5px;width:30px;height:30px;justify-content:center}
-.btn i{font-size:15px}
-.btn-sm i{font-size:13px}
+.bp{background:var(--acc);color:white;border-color:var(--acc)}.bp:hover{background:var(--acc2);border-color:var(--acc2)}
+.bd2{background:var(--rs);color:var(--red);border-color:rgba(220,38,38,.2)}.bd2:hover{background:var(--red);color:white}
+.bsu{background:var(--gs);color:var(--green);border-color:rgba(5,150,105,.2)}.bsu:hover{background:var(--green);color:white}
+.bsm{padding:4px 9px;font-size:12px}
+.bic{padding:5px;width:30px;height:30px;justify-content:center}
 
-/* SEARCH */
-.search-bar{display:flex;align-items:center;gap:8px;margin-bottom:1rem;padding:.7rem 1rem;background:var(--bg1);border:1px solid var(--bd);border-radius:var(--r)}
-.search-bar i{color:var(--t3);flex-shrink:0}
-.search-bar input{border:none;outline:none;background:transparent;flex:1;font-size:13px;color:var(--t1);font-family:inherit}
-.filter-row{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
-.filter-row select{padding:6px 10px;border:1px solid var(--bd2);border-radius:6px;font-size:12px;color:var(--t1);background:var(--bg1);font-family:inherit;cursor:pointer;outline:none}
+/* SEARCH/FILTER */
+.sb{display:flex;align-items:center;gap:8px;margin-bottom:.9rem;padding:.65rem 1rem;background:var(--bg1);border:1px solid var(--bd);border-radius:var(--r)}
+.sb i{color:var(--t3);flex-shrink:0}
+.sb input{border:none;outline:none;background:transparent;flex:1;font-size:13px;font-family:inherit}
+.fr{display:flex;gap:8px;margin-bottom:.9rem;flex-wrap:wrap}
+.fr select{padding:6px 10px;border:1px solid var(--bd2);border-radius:6px;font-size:12px;color:var(--t1);background:var(--bg1);font-family:inherit;cursor:pointer;outline:none}
 
 /* MODALS */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem}
-.modal-overlay.open{display:flex}
-.modal{background:var(--bg1);border-radius:var(--rl);width:100%;max-width:580px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.25)}
-.modal-lg{max-width:780px}
-.modal-header{padding:1.1rem 1.3rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.modal-header h3{font-size:15px;font-weight:700}
-.modal-body{padding:1.3rem;overflow-y:auto;flex:1}
-.modal-footer{padding:.9rem 1.3rem;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-field{display:flex;flex-direction:column;gap:5px}
-.form-field.full{grid-column:1/-1}
-.form-field label{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em}
-.form-field input,.form-field select,.form-field textarea{padding:9px 11px;border:1px solid var(--bd2);border-radius:var(--r);font-size:13px;font-family:inherit;color:var(--t1);outline:none;background:var(--bg1);transition:.15s}
-.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,127,212,.12)}
-.form-field textarea{resize:vertical;min-height:80px}
-.form-section{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--bd);grid-column:1/-1}
-.info-row{display:flex;gap:6px;align-items:center;padding:8px 10px;background:var(--acc-soft);border-radius:6px;font-size:12px;color:var(--acc);margin-bottom:12px}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem}
+.mo.open{display:flex}
+.md{background:var(--bg1);border-radius:var(--rl);width:100%;max-width:560px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.mdlg{max-width:760px}
+.mh{padding:1rem 1.2rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.mh h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:7px}
+.mb{padding:1.2rem;overflow-y:auto;flex:1}
+.mf{padding:.85rem 1.2rem;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.ff{display:flex;flex-direction:column;gap:4px}
+.ff.full{grid-column:1/-1}
+.ff label{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em}
+.ff input,.ff select,.ff textarea{padding:8px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:13px;font-family:inherit;color:var(--t1);outline:none;background:var(--bg1);transition:.15s}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,127,212,.12)}
+.ff textarea{resize:vertical;min-height:72px}
+.fsep{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--bd);grid-column:1/-1}
+
+/* CONFIRM */
+.cov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center}
+.cov.open{display:flex}
+.cbox{background:white;border-radius:var(--rl);padding:1.5rem;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.cbox h4{font-size:15px;font-weight:700;margin-bottom:8px}
+.cbox p{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:1.2rem}
+.cbts{display:flex;gap:8px;justify-content:flex-end}
 
 /* PATIENT CARD */
-.patient-info-card{background:var(--bg2);border-radius:var(--r);padding:1rem;margin-bottom:1rem;display:flex;gap:1rem;align-items:flex-start}
-.patient-avatar{width:48px;height:48px;background:var(--acc);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:18px;font-weight:700;flex-shrink:0}
-.patient-details h4{font-size:15px;font-weight:700}
-.patient-details p{font-size:12px;color:var(--t2);margin-top:2px}
-.patient-tabs{display:flex;gap:4px;margin-bottom:1rem;border-bottom:1px solid var(--bd);padding-bottom:0}
-.ptab{padding:7px 14px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.1s}
+.pic{background:var(--bg2);border-radius:var(--r);padding:1rem;margin-bottom:1rem;display:flex;gap:1rem;align-items:flex-start}
+.pav{width:46px;height:46px;background:var(--acc);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:17px;font-weight:700;flex-shrink:0}
+.pd h4{font-size:15px;font-weight:700}
+.pd p{font-size:12px;color:var(--t2);margin-top:2px;line-height:1.6}
+.ptabs{display:flex;border-bottom:1px solid var(--bd);margin-bottom:1rem}
+.ptab{padding:7px 14px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.1s;display:flex;align-items:center;gap:5px}
 .ptab.active{color:var(--acc);border-bottom-color:var(--acc)}
-.ptab-content{display:none}
-.ptab-content.active{display:block}
+.ptc{display:none}
+.ptc.active{display:block}
 
-/* RADIOGRAFIAS */
-.xray-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
-.xray-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:.15s}
-.xray-card:hover{border-color:var(--acc);transform:translateY(-1px);box-shadow:0 4px 12px rgba(26,127,212,.15)}
-.xray-thumb{height:100px;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);display:flex;align-items:center;justify-content:center;position:relative}
-.xray-thumb i{font-size:36px;color:rgba(255,255,255,0.3)}
-.xray-thumb .xray-overlay{position:absolute;inset:0;background:rgba(26,127,212,0);display:flex;align-items:center;justify-content:center;transition:.15s}
-.xray-card:hover .xray-overlay{background:rgba(26,127,212,0.2)}
-.xray-thumb .xray-overlay i{font-size:24px;color:white;opacity:0;transition:.15s}
-.xray-card:hover .xray-overlay i{opacity:1}
-.xray-info{padding:8px 10px}
-.xray-info h4{font-size:12px;font-weight:600;margin-bottom:2px}
-.xray-info p{font-size:11px;color:var(--t2)}
+/* XRAY */
+.xgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:11px}
+.xcard{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;transition:.15s;position:relative}
+.xcard:hover{border-color:var(--acc);transform:translateY(-1px);box-shadow:0 4px 12px rgba(26,127,212,.15)}
+.xt{height:95px;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.xt i{font-size:34px;color:rgba(255,255,255,.25)}
+.xt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85}
+.xov{position:absolute;inset:0;background:rgba(26,127,212,0);display:flex;align-items:center;justify-content:center;transition:.15s;gap:8px}
+.xcard:hover .xov{background:rgba(26,127,212,.3)}
+.xovb{opacity:0;transition:.15s;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;color:var(--t1)}
+.xcard:hover .xovb{opacity:1}
+.xi{padding:8px 10px}
+.xi h4{font-size:12px;font-weight:600;margin-bottom:2px}
+.xi p{font-size:11px;color:var(--t2)}
 
-/* FILE UPLOAD */
-.upload-zone{border:2px dashed var(--bd2);border-radius:var(--rl);padding:2rem;text-align:center;transition:.15s;cursor:pointer}
-.upload-zone:hover,.upload-zone.drag{border-color:var(--acc);background:var(--acc-soft)}
-.upload-zone i{font-size:36px;color:var(--t3);margin-bottom:8px;display:block}
-.upload-zone p{font-size:13px;color:var(--t2)}
-.upload-zone span{font-size:11px;color:var(--t3)}
-.uploaded-files{margin-top:12px;display:flex;flex-direction:column;gap:6px}
-.uploaded-file{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg2);border-radius:6px;font-size:12px}
-.uploaded-file i{color:var(--acc)}
-.uploaded-file span{flex:1}
-.uploaded-file button{background:none;border:none;color:var(--t3);cursor:pointer;padding:2px}
-.uploaded-file button:hover{color:var(--red)}
+/* UPLOAD */
+.uz{border:2px dashed var(--bd2);border-radius:var(--rl);padding:1.8rem;text-align:center;transition:.15s;cursor:pointer}
+.uz:hover,.uz.drag{border-color:var(--acc);background:var(--acc-soft)}
+.uz i{font-size:32px;color:var(--t3);margin-bottom:8px;display:block}
+.uz p{font-size:13px;color:var(--t2)}
+.uz span{font-size:11px;color:var(--t3)}
+.ufl{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.ufi{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg2);border-radius:6px;font-size:12px}
+.ufi i{color:var(--acc)}
+.ufi span{flex:1}
+.ufi button{background:none;border:none;color:var(--t3);cursor:pointer;padding:2px}
+.ufi button:hover{color:var(--red)}
 
-/* VIEWER */
-.xray-viewer{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:2000;display:none;align-items:center;justify-content:center;flex-direction:column}
-.xray-viewer.open{display:flex}
-.xray-viewer-img{max-width:80vw;max-height:75vh;object-fit:contain;border-radius:8px}
-.xray-viewer-placeholder{width:500px;max-width:80vw;height:350px;background:linear-gradient(135deg,#0d1b2a,#1a3a5c);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-.xray-viewer-placeholder i{font-size:72px;color:rgba(255,255,255,0.2)}
-.xray-viewer-placeholder p{color:rgba(255,255,255,0.5);font-size:14px}
-.xray-viewer-controls{display:flex;gap:12px;margin-top:16px}
-.xray-viewer-info{color:white;margin-top:12px;text-align:center}
-.xray-viewer-info h3{font-size:16px;font-weight:600}
-.xray-viewer-info p{font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px}
+/* XRAY VIEWER */
+.xv{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:3000;display:none;align-items:center;justify-content:center;flex-direction:column}
+.xv.open{display:flex}
+.xvi{position:relative;text-align:center}
+.xvph{width:480px;max-width:85vw;height:320px;background:linear-gradient(135deg,#0d1b2a,#1a3a5c);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.xvph i{font-size:64px;color:rgba(255,255,255,.18)}
+.xvph p{color:rgba(255,255,255,.4);font-size:13px}
+.xvimg{max-width:82vw;max-height:70vh;object-fit:contain;border-radius:8px;display:none}
+.xvinfo{color:white;margin-top:14px;text-align:center}
+.xvinfo h3{font-size:15px;font-weight:600}
+.xvinfo p{font-size:12px;color:rgba(255,255,255,.5);margin-top:3px}
+.xvc{display:flex;gap:10px;margin-top:14px;justify-content:center}
+.vb{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:white;font-family:inherit;transition:.15s}
+.vb:hover{background:rgba(255,255,255,.2)}
+.vbc{position:absolute;top:-40px;right:0}
 
-/* CONTABILIDAD */
-.contab-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.2rem}
-.contab-card{background:var(--bg1);border:1px solid var(--bd);border-radius:var(--r);padding:.9rem 1rem;text-align:center}
-.contab-card .val{font-size:18px;font-weight:700;margin-bottom:2px}
-.contab-card .lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--t3)}
-.progress-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:8px}
-.progress-fill{height:100%;border-radius:3px;transition:.5s}
+/* CONTAB */
+.ckpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.2rem}
+.ck{background:var(--bg1);border:1px solid var(--bd);border-radius:var(--r);padding:.85rem 1rem;text-align:center}
+.ck .val{font-size:18px;font-weight:700;margin-bottom:2px}
+.ck .lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--t3)}
+.pb{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:7px}
+.pbf{height:100%;border-radius:3px;transition:.5s}
 
 /* TABS */
-.tabs{display:flex;gap:4px;margin-bottom:1.2rem;border-bottom:1px solid var(--bd);padding-bottom:0}
+.tabs{display:flex;border-bottom:1px solid var(--bd);margin-bottom:1.2rem}
 .tab{padding:8px 16px;font-size:13px;font-weight:600;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.1s}
 .tab.active{color:var(--acc);border-bottom-color:var(--acc)}
-.tab-content{display:none}
-.tab-content.active{display:block}
+.tc{display:none}
+.tc.active{display:block}
 
-/* QUICK LINK */
-.quick-links{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.2rem}
-.quick-link{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:var(--acc-soft);color:var(--acc);border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:.1s;border:none;font-family:inherit}
-.quick-link:hover{background:var(--acc);color:white}
+/* QUICK */
+.ql{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.2rem}
+.qlb{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;background:var(--acc-soft);color:var(--acc);border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:.1s;border:none;font-family:inherit}
+.qlb:hover{background:var(--acc);color:white}
 
 /* TOAST */
-.toast-container{position:fixed;top:16px;right:16px;z-index:9000;display:flex;flex-direction:column;gap:8px}
-.toast{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:slideIn .2s ease;display:flex;align-items:center;gap:8px}
-.toast-success{background:#059669;color:white}
-.toast-error{background:#dc2626;color:white}
-.toast-info{background:var(--acc);color:white}
-@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.tsc{position:fixed;top:16px;right:16px;z-index:9000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.ts{padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,.15);animation:tin .2s ease;display:flex;align-items:center;gap:7px;pointer-events:all}
+.ts-s{background:#059669;color:white}.ts-e{background:#dc2626;color:white}.ts-i{background:var(--acc);color:white}
+@keyframes tin{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
 
 /* ACTIVITY */
-.activity-list{display:flex;flex-direction:column;gap:0}
-.activity-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd)}
-.activity-item:last-child{border-bottom:none}
-.activity-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.activity-text{flex:1}
-.activity-text strong{font-size:13px;font-weight:600}
-.activity-text p{font-size:12px;color:var(--t2);margin-top:1px}
-.activity-time{font-size:11px;color:var(--t3);white-space:nowrap}
+.ai{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd)}
+.ai:last-child{border-bottom:none}
+.aico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.atx{flex:1}
+.atx strong{font-size:13px;font-weight:600}
+.atx p{font-size:12px;color:var(--t2);margin-top:1px}
+.atm{font-size:11px;color:var(--t3);white-space:nowrap}
 
-/* EMPTY STATE */
-.empty-state{text-align:center;padding:3rem 1rem;color:var(--t3)}
-.empty-state i{font-size:48px;margin-bottom:12px;display:block;opacity:.4}
-.empty-state p{font-size:14px}
+/* AGENDA WEB BADGE */
+.web-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#7c3aed;color:white;text-transform:uppercase;letter-spacing:.04em;margin-left:6px}
 
-/* ADMIN ONLY */
+/* DANGER */
+.dz{border:1px solid rgba(220,38,38,.3);border-radius:var(--rl);padding:1.2rem;background:var(--rs)}
+.dz h4{color:var(--red);font-size:13px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.dz p{font-size:12px;color:var(--t2);margin-bottom:12px}
+
+/* REC */
+.rci{display:flex;gap:.75rem;padding:.75rem;background:var(--bg2);border-radius:6px;margin-bottom:8px}
+.rce{font-size:20px;flex-shrink:0}
+.rcb strong{font-size:13px;font-weight:600;display:block;margin-bottom:2px}
+.rcb span{font-size:12px;color:var(--t2);line-height:1.5}
+
+/* ADMIN */
 .admin-only{display:none}
-body.role-admin .admin-only{display:flex}
-body.role-admin .admin-only-block{display:block}
-.admin-only-block{display:none}
+body.is-admin .admin-only{display:flex}
+body.is-admin .admin-block{display:block}
+.admin-block{display:none}
 
-/* DANGER ZONE */
-.danger-zone{border:1px solid var(--red);border-radius:var(--rl);padding:1.2rem}
-.danger-zone h4{color:var(--red);font-size:13px;font-weight:700;margin-bottom:8px}
-.danger-zone p{font-size:12px;color:var(--t2);margin-bottom:12px}
-
-/* RESPONSIVE helpers */
-.text-right{text-align:right}
-.flex{display:flex;align-items:center;gap:8px}
-.gap-2{gap:8px}
-.ml-auto{margin-left:auto}
-.mt-1{margin-top:.5rem}
-.mt-2{margin-top:1rem}
+/* UTILS */
+.flex{display:flex;align-items:center;gap:7px}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--t3)}
+.empty i{font-size:40px;margin-bottom:10px;display:block;opacity:.35}
+.empty p{font-size:13px}
 </style>
 </head>
 <body>
 
-<!-- ─── TOAST CONTAINER ─── -->
-<div class="toast-container" id="toasts"></div>
+<div class="tsc" id="toasts"></div>
 
-<!-- ─── LOGIN ─── -->
-<div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">
-      <div class="logo-icon"><i class="ti ti-tooth"></i></div>
-      <h1>BigTooth CRM</h1>
-      <p>Clínica Dental · Deusto, Bilbao</p>
-    </div>
-    <div class="login-error" id="login-error">Usuario o contraseña incorrectos</div>
-    <div class="login-field">
-      <label>Usuario</label>
-      <input type="text" id="login-user" placeholder="admin / recepcion" autocomplete="username">
-    </div>
-    <div class="login-field">
-      <label>Contraseña</label>
-      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <button class="login-btn" onclick="doLogin()"><i class="ti ti-login"></i> Entrar</button>
-    <div class="login-hint">
-      Admin: <code>admin</code> / <code>admin123</code> &nbsp;|&nbsp; Recepción: <code>recepcion</code> / <code>rec123</code>
+<!-- CONFIRM -->
+<div class="cov" id="cov">
+  <div class="cbox">
+    <h4 id="ctitle">¿Confirmar?</h4>
+    <p id="cmsg"></p>
+    <div class="cbts">
+      <button class="btn" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn bd2" id="cok">Eliminar</button>
     </div>
   </div>
 </div>
 
-<!-- ─── APP ─── -->
-<div id="app">
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="topbar-logo">
-      <div class="logo-dot"><i class="ti ti-tooth"></i></div>
-      BigTooth
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="lbox">
+    <div class="llogo">
+      <div class="li"><i class="ti ti-tooth"></i></div>
+      <h1>BigTooth CRM</h1>
+      <p>Clínica Dental · Deusto, Bilbao</p>
     </div>
-    <span class="topbar-title" id="topbar-title">Dashboard</span>
-    <div class="topbar-right">
-      <span class="role-badge" id="role-badge">Admin</span>
-      <button class="user-btn" onclick="doLogout()">
-        <div class="user-avatar" id="user-avatar">A</div>
-        <span id="user-name">Admin</span>
-        <i class="ti ti-logout" style="font-size:14px"></i>
+    <div class="lerr" id="lerr">Usuario o contraseña incorrectos</div>
+    <div class="lf"><label>Usuario</label><input type="text" id="lu" placeholder="admin / recepcion" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="lf"><label>Contraseña</label><input type="password" id="lp" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="lbtn" onclick="doLogin()"><i class="ti ti-login"></i> Entrar</button>
+    <div class="lhint">Admin: <code>admin</code> / <code>admin123</code><br>Recepción: <code>recepcion</code> / <code>rec123</code></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="tlogo"><div class="ldot"><i class="ti ti-tooth"></i></div>BigTooth</div>
+    <span class="ttitle" id="ttitle">Dashboard</span>
+    <div class="tright">
+      <span class="rbadge" id="rbadge"></span>
+      <button class="ubtn" onclick="doLogout()">
+        <div class="uav" id="uav"></div>
+        <span id="uname"></span>
+        <i class="ti ti-logout" style="font-size:13px"></i>
       </button>
     </div>
   </div>
 
-  <!-- BODY -->
-  <div class="app-body">
-    <!-- SIDEBAR -->
+  <div class="abody">
     <div class="sidebar">
-      <div class="sb-section">Principal</div>
-      <button class="sb-item active" id="sb-dashboard" onclick="showPage('dashboard',this)"><i class="ti ti-dashboard"></i>Dashboard</button>
-      <button class="sb-item" id="sb-agenda" onclick="showPage('agenda',this)"><i class="ti ti-calendar"></i>Agenda</button>
+      <div class="sbs">Principal</div>
+      <button class="sbi active" onclick="showPage('dashboard',this)"><i class="ti ti-dashboard"></i>Dashboard</button>
+      <button class="sbi" onclick="showPage('agenda',this)"><i class="ti ti-calendar-check"></i>Agenda <span class="sbb" id="badge-agenda" style="display:none">0</span></button>
 
-      <div class="sb-section">Pacientes</div>
-      <button class="sb-item" id="sb-pacientes" onclick="showPage('pacientes',this)"><i class="ti ti-user-heart"></i>Pacientes</button>
-      <button class="sb-item" id="sb-tratamientos" onclick="showPage('tratamientos',this)"><i class="ti ti-tooth"></i>Tratamientos</button>
-      <button class="sb-item" id="sb-radiografias" onclick="showPage('radiografias',this)"><i class="ti ti-scan"></i>Radiografías</button>
+      <div class="sbs">Clínica</div>
+      <button class="sbi" onclick="showPage('pacientes',this)"><i class="ti ti-user-heart"></i>Pacientes</button>
+      <button class="sbi" onclick="showPage('tratamientos',this)"><i class="ti ti-tooth"></i>Tratamientos</button>
+      <button class="sbi" onclick="showPage('radiografias',this)"><i class="ti ti-scan"></i>Radiografías</button>
 
-      <div class="sb-section">Finanzas</div>
-      <button class="sb-item" id="sb-facturas" onclick="showPage('facturas',this)"><i class="ti ti-receipt"></i>Facturas <span class="badge-count" id="badge-pendiente">2</span></button>
-      <button class="sb-item" id="sb-contabilidad" onclick="showPage('contabilidad',this)"><i class="ti ti-chart-bar"></i>Contabilidad</button>
+      <div class="sbs">Finanzas</div>
+      <button class="sbi" onclick="showPage('facturas',this)"><i class="ti ti-receipt"></i>Facturas <span class="sbb" id="badge-fac">0</span></button>
+      <button class="sbi" onclick="showPage('contabilidad',this)"><i class="ti ti-chart-line"></i>Contabilidad</button>
+      <button class="sbi" onclick="showPage('captacion',this)"><i class="ti ti-speakerphone"></i>Captación</button>
 
-      <div class="sb-section admin-only-block">Administración</div>
-      <button class="sb-item admin-only" id="sb-ajustes" onclick="showPage('ajustes',this)"><i class="ti ti-settings"></i>Ajustes</button>
-
-      <div class="sb-footer">
-        <div style="font-size:11px;color:var(--t3);text-align:center">WebAgency Bilbao · v2.0</div>
-      </div>
+      <div class="sbs admin-block">Admin</div>
+      <button class="sbi admin-only" onclick="showPage('ajustes',this)"><i class="ti ti-settings"></i>Ajustes</button>
+      <div class="sbfoot"><div style="font-size:11px;color:var(--t3);text-align:center">WebAgency Bilbao · v3.0</div></div>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div class="main">
 
-      <!-- ── DASHBOARD ── -->
+      <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
-        <div class="page-header">
-          <h2>Dashboard</h2>
-          <div class="actions">
-            <button class="btn btn-primary" onclick="openModal('modal-cita')"><i class="ti ti-plus"></i> Nueva cita</button>
-          </div>
+        <div class="ph"><h2>Dashboard</h2><div class="pa"><button class="btn bp" onclick="openModal('mcita')"><i class="ti ti-plus"></i> Nueva cita</button></div></div>
+        <div class="g4">
+          <div class="kpi"><div class="kpi-l">Pacientes activos</div><div class="kpi-v" id="kpi-pac">—</div><div class="kpi-s kg" id="kpi-pac-s"></div></div>
+          <div class="kpi"><div class="kpi-l">Citas pendientes</div><div class="kpi-v" id="kpi-cit">—</div><div class="kpi-s" id="kpi-cit-s"></div></div>
+          <div class="kpi"><div class="kpi-l">Facturado total</div><div class="kpi-v" id="kpi-tot">—</div><div class="kpi-s kg" id="kpi-cob-s"></div></div>
+          <div class="kpi"><div class="kpi-l">Pendiente cobro</div><div class="kpi-v" id="kpi-pen">—</div><div class="kpi-s kr" id="kpi-pen-s"></div></div>
         </div>
-        <div class="grid4">
-          <div class="kpi">
-            <div class="kpi-label">Pacientes activos</div>
-            <div class="kpi-val" id="kpi-pacientes">12</div>
-            <div class="kpi-sub green">↑ 3 este mes</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Citas hoy</div>
-            <div class="kpi-val">5</div>
-            <div class="kpi-sub">2 tarde, 3 mañana</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Facturado (junio)</div>
-            <div class="kpi-val" id="kpi-facturado">0€</div>
-            <div class="kpi-sub green" id="kpi-cobrado-sub">Calculando...</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Pendiente cobro</div>
-            <div class="kpi-val" id="kpi-pendiente">0€</div>
-            <div class="kpi-sub red" id="kpi-pendiente-sub">Calculando...</div>
-          </div>
+        <div class="g2">
+          <div class="card"><div class="ch"><h3><i class="ti ti-chart-bar"></i>Facturación últimos 6 meses</h3></div><div class="cw"><canvas id="chart-dash"></canvas></div></div>
+          <div class="card"><div class="ch"><h3><i class="ti ti-activity"></i>Actividad reciente</h3></div><div style="padding:.8rem 1rem" id="actlist"></div></div>
         </div>
-
-        <div class="grid2">
-          <div class="card">
-            <div class="card-header"><h3>Citas de hoy</h3><button class="btn btn-sm" onclick="showPage('agenda',document.getElementById('sb-agenda'))">Ver agenda</button></div>
-            <div class="card-body">
-              <table>
-                <thead><tr><th>Hora</th><th>Paciente</th><th>Tratamiento</th><th>Estado</th></tr></thead>
-                <tbody>
-                  <tr><td>09:00</td><td class="td-link" onclick="abrirPaciente(1)">Ane Txakartegi</td><td>Revisión</td><td><span class="badge badge-green">Confirmada</span></td></tr>
-                  <tr><td>10:30</td><td class="td-link" onclick="abrirPaciente(2)">Mikel Garate</td><td>Ortodoncia</td><td><span class="badge badge-green">Confirmada</span></td></tr>
-                  <tr><td>12:00</td><td class="td-link" onclick="abrirPaciente(3)">Leire Iturriaga</td><td>Limpieza</td><td><span class="badge badge-yellow">Pendiente</span></td></tr>
-                  <tr><td>16:00</td><td class="td-link" onclick="abrirPaciente(4)">Jon Urrutia</td><td>Extracción</td><td><span class="badge badge-green">Confirmada</span></td></tr>
-                  <tr><td>17:30</td><td class="td-link" onclick="abrirPaciente(5)">Amaia Basauri</td><td>Implante</td><td><span class="badge badge-yellow">Pendiente</span></td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-header"><h3>Actividad reciente</h3></div>
-            <div class="card-body" style="padding:.8rem 1rem">
-              <div class="activity-list" id="activity-list">
-                <div class="activity-item">
-                  <div class="activity-icon" style="background:var(--green-soft)"><i class="ti ti-receipt" style="color:var(--green);font-size:14px"></i></div>
-                  <div class="activity-text"><strong>Factura pagada</strong><p>Ane Txakartegi · 380€</p></div>
-                  <span class="activity-time">Hace 1h</span>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-icon" style="background:var(--blue-soft)"><i class="ti ti-scan" style="color:var(--blue);font-size:14px"></i></div>
-                  <div class="activity-text"><strong>Radiografía subida</strong><p>Mikel Garate · Panorámica</p></div>
-                  <span class="activity-time">Hace 2h</span>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-icon" style="background:#fef3c7"><i class="ti ti-tooth" style="color:var(--yellow);font-size:14px"></i></div>
-                  <div class="activity-text"><strong>Tratamiento iniciado</strong><p>Leire Iturriaga · Ortodoncia</p></div>
-                  <span class="activity-time">Ayer</span>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-icon" style="background:var(--acc-soft)"><i class="ti ti-user-plus" style="color:var(--acc);font-size:14px"></i></div>
-                  <div class="activity-text"><strong>Nuevo paciente</strong><p>Jon Urrutia registrado</p></div>
-                  <span class="activity-time">Ayer</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- QUICK ACTIONS -->
         <div class="card">
-          <div class="card-header"><h3>Acciones rápidas</h3></div>
-          <div class="card-body" style="padding:1rem">
-            <div class="quick-links">
-              <button class="quick-link" onclick="openModal('modal-paciente')"><i class="ti ti-user-plus"></i> Nuevo paciente</button>
-              <button class="quick-link" onclick="openModal('modal-tratamiento')"><i class="ti ti-tooth"></i> Nuevo tratamiento</button>
-              <button class="quick-link" onclick="openModal('modal-factura')"><i class="ti ti-receipt"></i> Nueva factura</button>
-              <button class="quick-link" onclick="openModal('modal-radiografia')"><i class="ti ti-scan"></i> Subir radiografía</button>
-              <button class="quick-link" onclick="openModal('modal-cita')"><i class="ti ti-calendar-plus"></i> Nueva cita</button>
-            </div>
-          </div>
+          <div class="ch"><h3>Acciones rápidas</h3></div>
+          <div style="padding:.9rem 1rem"><div class="ql">
+            <button class="qlb" onclick="openModal('mpac')"><i class="ti ti-user-plus"></i> Nuevo paciente</button>
+            <button class="qlb" onclick="openModal('mtrat')"><i class="ti ti-tooth"></i> Nuevo tratamiento</button>
+            <button class="qlb" onclick="openModal('mfac')"><i class="ti ti-receipt"></i> Nueva factura</button>
+            <button class="qlb" onclick="openModal('mrx')"><i class="ti ti-scan"></i> Subir radiografía</button>
+            <button class="qlb" onclick="openModal('mcita')"><i class="ti ti-calendar-plus"></i> Nueva cita</button>
+          </div></div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3><i class="ti ti-calendar"></i>Citas de hoy</h3><button class="btn bsm" onclick="showPage('agenda',document.querySelectorAll('.sbi')[1])">Ver agenda</button></div>
+          <table><thead><tr><th>Hora</th><th>Paciente</th><th>Motivo</th><th>Doctor</th><th>Origen</th><th>Estado</th></tr></thead><tbody id="tbody-hoy"></tbody></table>
         </div>
       </div>
 
-      <!-- ── AGENDA ── -->
+      <!-- AGENDA -->
       <div class="page" id="page-agenda">
-        <div class="page-header">
-          <h2>Agenda</h2>
-          <div class="actions">
-            <button class="btn btn-primary" onclick="openModal('modal-cita')"><i class="ti ti-plus"></i> Nueva cita</button>
-          </div>
+        <div class="ph"><h2>Agenda</h2><div class="pa">
+          <button class="btn" onclick="syncCitasWeb()" id="btn-sync"><i class="ti ti-refresh"></i> Sync web</button>
+          <button class="btn bp" onclick="openModal('mcita')"><i class="ti ti-plus"></i> Nueva cita</button>
+        </div></div>
+        <div style="padding:.6rem .9rem;background:var(--bs);border-radius:var(--r);margin-bottom:.9rem;font-size:12px;color:var(--blue);display:flex;align-items:center;gap:8px">
+          <i class="ti ti-info-circle"></i>
+          <span>Las citas enviadas desde la web (bigtooth.netlify.app) aparecen aquí automáticamente. <strong id="sync-status">Último sync: al cargar</strong></span>
         </div>
-        <div class="filter-row">
-          <select><option>Hoy — 28 Junio 2026</option><option>Mañana</option><option>Esta semana</option></select>
+        <div class="sb"><i class="ti ti-search"></i><input type="text" placeholder="Buscar por nombre, tratamiento..." oninput="filterT(this,'t-agenda')"></div>
+        <div class="fr">
+          <select onchange="filterE(this,'t-agenda')"><option value="">Todos los estados</option><option>Pendiente</option><option>Confirmada</option><option>Completada</option><option>Cancelada</option></select>
+          <select><option>Todos los orígenes</option><option>CRM</option><option>Web</option></select>
           <select><option>Todos los doctores</option><option>Dra. Eider Landa</option><option>Dr. Iñigo Mendoza</option></select>
         </div>
-        <div class="card">
-          <div class="card-body">
-            <table>
-              <thead><tr><th>Hora</th><th>Paciente</th><th>Doctor</th><th>Tratamiento</th><th>Duración</th><th>Estado</th><th>Acciones</th></tr></thead>
-              <tbody>
-                <tr><td>09:00</td><td class="td-link" onclick="abrirPaciente(1)">Ane Txakartegi</td><td>Dra. Eider Landa</td><td>Revisión general</td><td>30 min</td><td><span class="badge badge-green">Confirmada</span></td><td><div class="flex"><button class="btn btn-sm btn-icon" title="Ver"><i class="ti ti-eye"></i></button><button class="btn btn-sm btn-icon" title="Editar"><i class="ti ti-edit"></i></button></div></td></tr>
-                <tr><td>10:30</td><td class="td-link" onclick="abrirPaciente(2)">Mikel Garate</td><td>Dr. Iñigo Mendoza</td><td>Control ortodoncia</td><td>45 min</td><td><span class="badge badge-green">Confirmada</span></td><td><div class="flex"><button class="btn btn-sm btn-icon"><i class="ti ti-eye"></i></button><button class="btn btn-sm btn-icon"><i class="ti ti-edit"></i></button></div></td></tr>
-                <tr><td>12:00</td><td class="td-link" onclick="abrirPaciente(3)">Leire Iturriaga</td><td>Dra. Eider Landa</td><td>Limpieza bucal</td><td>60 min</td><td><span class="badge badge-yellow">Pendiente</span></td><td><div class="flex"><button class="btn btn-sm btn-icon"><i class="ti ti-eye"></i></button><button class="btn btn-sm btn-icon"><i class="ti ti-edit"></i></button></div></td></tr>
-                <tr><td>16:00</td><td class="td-link" onclick="abrirPaciente(4)">Jon Urrutia</td><td>Dr. Iñigo Mendoza</td><td>Extracción molar</td><td>45 min</td><td><span class="badge badge-green">Confirmada</span></td><td><div class="flex"><button class="btn btn-sm btn-icon"><i class="ti ti-eye"></i></button><button class="btn btn-sm btn-icon"><i class="ti ti-edit"></i></button></div></td></tr>
-                <tr><td>17:30</td><td class="td-link" onclick="abrirPaciente(5)">Amaia Basauri</td><td>Dra. Eider Landa</td><td>Implante dental</td><td>90 min</td><td><span class="badge badge-yellow">Pendiente</span></td><td><div class="flex"><button class="btn btn-sm btn-icon"><i class="ti ti-eye"></i></button><button class="btn btn-sm btn-icon"><i class="ti ti-edit"></i></button></div></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <div class="card"><table id="t-agenda">
+          <thead><tr><th>Fecha</th><th>Hora</th><th>Paciente</th><th>Motivo</th><th>Doctor</th><th>Dur.</th><th>Origen</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-agenda"></tbody>
+        </table></div>
       </div>
 
-      <!-- ── PACIENTES ── -->
+      <!-- PACIENTES -->
       <div class="page" id="page-pacientes">
-        <div class="page-header">
-          <h2>Pacientes</h2>
-          <div class="actions">
-            <button class="btn btn-primary" onclick="openModal('modal-paciente')"><i class="ti ti-user-plus"></i> Nuevo paciente</button>
-          </div>
-        </div>
-        <div class="search-bar"><i class="ti ti-search"></i><input type="text" placeholder="Buscar paciente por nombre, DNI o teléfono..." oninput="filterTable(this,'tabla-pacientes')"></div>
-        <div class="filter-row">
-          <select onchange="filterEstado(this,'tabla-pacientes')"><option value="">Todos los estados</option><option value="Activo">Activo</option><option value="Alta reciente">Alta reciente</option><option value="En tratamiento">En tratamiento</option></select>
-        </div>
-        <div class="card">
-          <div class="card-body">
-            <table id="tabla-pacientes">
-              <thead><tr><th>Paciente</th><th>DNI</th><th>Teléfono</th><th>Última visita</th><th>Tratamientos</th><th>Facturas</th><th>Radiografías</th><th>Estado</th><th>Acciones</th></tr></thead>
-              <tbody id="tbody-pacientes"></tbody>
-            </table>
-          </div>
-        </div>
+        <div class="ph"><h2>Pacientes</h2><div class="pa"><button class="btn bp" onclick="openModal('mpac')"><i class="ti ti-user-plus"></i> Nuevo paciente</button></div></div>
+        <div class="sb"><i class="ti ti-search"></i><input type="text" placeholder="Buscar por nombre, DNI o teléfono..." oninput="filterT(this,'t-pac')"></div>
+        <div class="fr"><select onchange="filterE(this,'t-pac')"><option value="">Todos los estados</option><option>Activo</option><option>En tratamiento</option><option>Alta reciente</option></select></div>
+        <div class="card"><table id="t-pac"><thead><tr><th>Paciente</th><th>DNI</th><th>Teléfono</th><th>Tratamientos</th><th>Facturas</th><th>Radiografías</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tbody-pac"></tbody></table></div>
       </div>
 
-      <!-- ── TRATAMIENTOS ── -->
+      <!-- TRATAMIENTOS -->
       <div class="page" id="page-tratamientos">
-        <div class="page-header">
-          <h2>Tratamientos</h2>
-          <div class="actions">
-            <button class="btn btn-primary" onclick="openModal('modal-tratamiento')"><i class="ti ti-plus"></i> Nuevo tratamiento</button>
-          </div>
-        </div>
-        <div class="search-bar"><i class="ti ti-search"></i><input type="text" placeholder="Buscar por paciente o tipo de tratamiento..." oninput="filterTable(this,'tabla-tratamientos')"></div>
-        <div class="filter-row">
-          <select onchange="filterEstado(this,'tabla-tratamientos')"><option value="">Todos los estados</option><option value="En curso">En curso</option><option value="Completado">Completado</option><option value="Pendiente">Pendiente</option><option value="Cancelado">Cancelado</option></select>
-          <select><option>Todos los doctores</option><option>Dra. Eider Landa</option><option>Dr. Iñigo Mendoza</option></select>
-        </div>
-        <div class="card">
-          <div class="card-body">
-            <table id="tabla-tratamientos">
-              <thead><tr><th>Paciente</th><th>Tipo</th><th>Doctor</th><th>Inicio</th><th>Sesiones</th><th>Coste</th><th>Factura</th><th>Estado</th><th>Acciones</th></tr></thead>
-              <tbody id="tbody-tratamientos"></tbody>
-            </table>
-          </div>
-        </div>
+        <div class="ph"><h2>Tratamientos</h2><div class="pa"><button class="btn bp" onclick="openModal('mtrat')"><i class="ti ti-plus"></i> Nuevo tratamiento</button></div></div>
+        <div class="sb"><i class="ti ti-search"></i><input type="text" placeholder="Buscar por paciente o tipo..." oninput="filterT(this,'t-trat')"></div>
+        <div class="fr"><select onchange="filterE(this,'t-trat')"><option value="">Todos los estados</option><option>En curso</option><option>Completado</option><option>Pendiente</option><option>Cancelado</option></select></div>
+        <div class="card"><table id="t-trat"><thead><tr><th>Paciente</th><th>Tipo</th><th>Doctor</th><th>Inicio</th><th>Sesiones</th><th>Coste</th><th>Factura</th><th>Estado</th><th></th></tr></thead><tbody id="tbody-trat"></tbody></table></div>
       </div>
 
-      <!-- ── RADIOGRAFÍAS ── -->
+      <!-- RADIOGRAFÍAS -->
       <div class="page" id="page-radiografias">
-        <div class="page-header">
-          <h2>Radiografías</h2>
-          <div class="actions">
-            <button class="btn btn-primary" onclick="openModal('modal-radiografia')"><i class="ti ti-plus"></i> Subir radiografía</button>
-          </div>
+        <div class="ph"><h2>Radiografías</h2><div class="pa"><button class="btn bp" onclick="openModal('mrx')"><i class="ti ti-plus"></i> Subir radiografía</button></div></div>
+        <div class="sb"><i class="ti ti-search"></i><input type="text" placeholder="Buscar por paciente o tipo..." oninput="rxFilter(this.value)"></div>
+        <div class="fr">
+          <select id="rx-fp" onchange="rxFilter()"><option value="">Todos los pacientes</option></select>
+          <select id="rx-ft" onchange="rxFilter()"><option value="">Todos los tipos</option><option>Panorámica</option><option>Periapical</option><option>Aleta mordida</option><option>Cefalométrica</option><option>TAC 3D</option></select>
         </div>
-        <div class="search-bar"><i class="ti ti-search"></i><input type="text" placeholder="Buscar por paciente o tipo..." oninput="filterXrays(this)"></div>
-        <div class="filter-row">
-          <select id="filtro-xray-paciente" onchange="filterXrays()"><option value="">Todos los pacientes</option></select>
-          <select id="filtro-xray-tipo" onchange="filterXrays()"><option value="">Todos los tipos</option><option>Panorámica</option><option>Periapical</option><option>Aleta mordida</option><option>Cefalométrica</option><option>TAC 3D</option></select>
-        </div>
-        <div id="xray-grid-container" class="xray-grid"></div>
+        <div id="rxgrid" class="xgrid"></div>
       </div>
 
-      <!-- ── FACTURAS ── -->
+      <!-- FACTURAS -->
       <div class="page" id="page-facturas">
-        <div class="page-header">
-          <h2>Facturas</h2>
-          <div class="actions">
-            <button class="btn" onclick="exportCSV('tabla-facturas','facturas-bigtooth')"><i class="ti ti-download"></i> Exportar</button>
-            <button class="btn btn-primary" onclick="openModal('modal-factura')"><i class="ti ti-plus"></i> Nueva factura</button>
-          </div>
-        </div>
-        <div class="search-bar"><i class="ti ti-search"></i><input type="text" placeholder="Buscar factura por número, paciente o tratamiento..." oninput="filterTable(this,'tabla-facturas')"></div>
-        <div class="filter-row">
-          <select onchange="filterEstado(this,'tabla-facturas')"><option value="">Todos los estados</option><option value="Pagada">Pagada</option><option value="Pendiente">Pendiente</option><option value="Vencida">Vencida</option></select>
-        </div>
-        <div class="card">
-          <div class="card-body">
-            <table id="tabla-facturas">
-              <thead><tr><th>Nº Factura</th><th>Paciente</th><th>Tratamiento</th><th>Fecha</th><th>Importe</th><th>Estado</th><th>Acciones</th></tr></thead>
-              <tbody id="tbody-facturas"></tbody>
-            </table>
-          </div>
-        </div>
+        <div class="ph"><h2>Facturas</h2><div class="pa">
+          <button class="btn" onclick="expCSV('t-fac','facturas-bigtooth')"><i class="ti ti-download"></i> CSV</button>
+          <button class="btn bp" onclick="openModal('mfac')"><i class="ti ti-plus"></i> Nueva factura</button>
+        </div></div>
+        <div class="sb"><i class="ti ti-search"></i><input type="text" placeholder="Buscar por número, paciente o concepto..." oninput="filterT(this,'t-fac')"></div>
+        <div class="fr"><select onchange="filterE(this,'t-fac')"><option value="">Todos los estados</option><option>Pagada</option><option>Pendiente</option><option>Vencida</option></select></div>
+        <div class="card"><table id="t-fac"><thead><tr><th>Nº</th><th>Paciente</th><th>Concepto</th><th>Fecha</th><th>Importe</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tbody-fac"></tbody></table></div>
       </div>
 
-      <!-- ── CONTABILIDAD ── -->
+      <!-- CONTABILIDAD -->
       <div class="page" id="page-contabilidad">
-        <div class="page-header">
-          <h2>Contabilidad</h2>
-          <div class="actions">
-            <button class="btn" onclick="exportCSV('tabla-facturas','contabilidad-bigtooth')"><i class="ti ti-download"></i> Exportar</button>
-          </div>
-        </div>
-        <div class="contab-summary" id="contab-summary">
-          <!-- Generado por JS -->
-        </div>
+        <div class="ph"><h2>Contabilidad</h2><div class="pa"><button class="btn" onclick="expCSV('t-fac','contabilidad-bigtooth')"><i class="ti ti-download"></i> Exportar</button></div></div>
+        <div class="ckpis" id="ckpis"></div>
         <div class="tabs">
-          <div class="tab active" onclick="switchTab(this,'tab-resumen')">Resumen por estado</div>
-          <div class="tab" onclick="switchTab(this,'tab-mensual')">Por mes</div>
-          <div class="tab" onclick="switchTab(this,'tab-paciente')">Por paciente</div>
+          <div class="tab active" onclick="sTab(this,'tc-evo')">Evolución</div>
+          <div class="tab" onclick="sTab(this,'tc-tip')">Por tratamiento</div>
+          <div class="tab" onclick="sTab(this,'tc-est')">Por estado</div>
+          <div class="tab" onclick="sTab(this,'tc-pac')">Por paciente</div>
         </div>
-        <div class="tab-content active" id="tab-resumen">
-          <div class="card">
-            <div class="card-header"><h3>Facturas por estado</h3></div>
-            <div class="card-body">
-              <table id="tabla-contab-estado">
-                <thead><tr><th>Estado</th><th>Cantidad</th><th>Importe total</th><th>% del total</th><th>Acción</th></tr></thead>
-                <tbody id="tbody-contab-estado"></tbody>
-              </table>
-            </div>
+        <div class="tc active" id="tc-evo">
+          <div class="g2">
+            <div class="card"><div class="ch"><h3><i class="ti ti-chart-line"></i>Facturado vs Cobrado</h3></div><div class="cw"><canvas id="ch-evo"></canvas></div></div>
+            <div class="card"><div class="ch"><h3><i class="ti ti-chart-bar"></i>Cobrado vs Pendiente</h3></div><div class="cw"><canvas id="ch-stk"></canvas></div></div>
           </div>
         </div>
-        <div class="tab-content" id="tab-mensual">
-          <div class="card">
-            <div class="card-header"><h3>Ingresos mensuales 2026</h3></div>
-            <div class="card-body">
-              <table>
-                <thead><tr><th>Mes</th><th>Facturas emitidas</th><th>Cobrado</th><th>Pendiente</th></tr></thead>
-                <tbody>
-                  <tr><td>Enero</td><td>8</td><td>2.840€</td><td>—</td></tr>
-                  <tr><td>Febrero</td><td>10</td><td>3.120€</td><td>—</td></tr>
-                  <tr><td>Marzo</td><td>9</td><td>2.950€</td><td>—</td></tr>
-                  <tr><td>Abril</td><td>11</td><td>3.680€</td><td>—</td></tr>
-                  <tr><td>Mayo</td><td>12</td><td>3.940€</td><td>280€</td></tr>
-                  <tr><td><strong>Junio</strong></td><td id="cont-mes-facturas"><strong>—</strong></td><td id="cont-mes-cobrado"><strong>—</strong></td><td id="cont-mes-pendiente"><strong>—</strong></td></tr>
-                </tbody>
-              </table>
-            </div>
+        <div class="tc" id="tc-tip">
+          <div class="g2">
+            <div class="card"><div class="ch"><h3><i class="ti ti-chart-donut"></i>Ingresos por tratamiento</h3></div><div class="cw" style="height:260px"><canvas id="ch-don"></canvas></div></div>
+            <div class="card"><div class="ch"><h3>Desglose por tipo</h3></div><table><thead><tr><th>Tratamiento</th><th>Facturas</th><th>Total</th><th>%</th></tr></thead><tbody id="tbody-tipos"></tbody></table></div>
           </div>
         </div>
-        <div class="tab-content" id="tab-paciente">
-          <div class="card">
-            <div class="card-header"><h3>Facturación por paciente</h3></div>
-            <div class="card-body">
-              <table id="tabla-contab-paciente">
-                <thead><tr><th>Paciente</th><th>Facturas</th><th>Total facturado</th><th>Cobrado</th><th>Pendiente</th></tr></thead>
-                <tbody id="tbody-contab-paciente"></tbody>
-              </table>
-            </div>
-          </div>
+        <div class="tc" id="tc-est">
+          <div class="card"><div class="ch"><h3>Por estado de pago</h3></div><table><thead><tr><th>Estado</th><th>Facturas</th><th>Importe</th><th>%</th><th></th></tr></thead><tbody id="tbody-est"></tbody></table></div>
+        </div>
+        <div class="tc" id="tc-pac">
+          <div class="card"><div class="ch"><h3>Por paciente</h3></div><table><thead><tr><th>Paciente</th><th>Facturas</th><th>Total</th><th>Cobrado</th><th>Pendiente</th></tr></thead><tbody id="tbody-cpac"></tbody></table></div>
         </div>
       </div>
 
-      <!-- ── AJUSTES (ADMIN ONLY) ── -->
+      <!-- CAPTACIÓN -->
+      <div class="page" id="page-captacion">
+        <div class="ph"><h2>Captación y análisis</h2></div>
+        <div class="g4" id="capt-kpis"></div>
+        <div class="g2">
+          <div class="card"><div class="ch"><h3><i class="ti ti-trending-up"></i>Nuevos pacientes / mes</h3></div><div class="cw"><canvas id="ch-nue"></canvas></div></div>
+          <div class="card"><div class="ch"><h3><i class="ti ti-map-pin"></i>Distribución por zona</h3></div><div class="cw"><canvas id="ch-zon"></canvas></div></div>
+        </div>
+        <div class="card"><div class="ch"><h3><i class="ti ti-bulb"></i>Recomendaciones de marketing</h3></div><div style="padding:.9rem 1rem" id="recs"></div></div>
+      </div>
+
+      <!-- AJUSTES -->
       <div class="page" id="page-ajustes">
-        <div class="page-header"><h2>Ajustes</h2></div>
-        <div class="grid2">
-          <div class="card">
-            <div class="card-header"><h3><i class="ti ti-users" style="font-size:14px;margin-right:4px"></i> Usuarios del sistema</h3></div>
-            <div class="card-body">
-              <table>
-                <thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th></tr></thead>
-                <tbody>
-                  <tr><td>admin</td><td><span class="badge badge-yellow">Admin</span></td><td><span class="badge badge-green">Activo</span></td></tr>
-                  <tr><td>recepcion</td><td><span class="badge badge-blue">Employee</span></td><td><span class="badge badge-green">Activo</span></td></tr>
-                </tbody>
-              </table>
-            </div>
+        <div class="ph"><h2>Ajustes</h2></div>
+        <div class="g2">
+          <div class="card"><div class="ch"><h3><i class="ti ti-users"></i>Usuarios</h3></div>
+            <table><thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th></tr></thead><tbody>
+              <tr><td>admin</td><td><span class="badge by2">Admin</span></td><td><span class="badge bg2">Activo</span></td></tr>
+              <tr><td>recepcion</td><td><span class="badge bb2">Employee</span></td><td><span class="badge bg2">Activo</span></td></tr>
+            </tbody></table>
           </div>
-          <div class="card">
-            <div class="card-header"><h3><i class="ti ti-info-circle" style="font-size:14px;margin-right:4px"></i> Información de la clínica</h3></div>
-            <div class="card-body" style="padding:1rem">
-              <div class="form-grid">
-                <div class="form-field"><label>Nombre</label><input type="text" value="Clínica Dental BigTooth"></div>
-                <div class="form-field"><label>NIF</label><input type="text" value="B48123456"></div>
-                <div class="form-field"><label>Teléfono</label><input type="text" value="+34 944 123 456"></div>
-                <div class="form-field"><label>Email</label><input type="text" value="info@bigtooth.es"></div>
-                <div class="form-field full"><label>Dirección</label><input type="text" value="C/ Lehendakari Aguirre, 12, Deusto, Bilbao"></div>
-              </div>
-              <div style="padding:0 0 .5rem;margin-top:12px;text-align:right"><button class="btn btn-primary btn-sm"><i class="ti ti-device-floppy"></i> Guardar</button></div>
-            </div>
+          <div class="card"><div class="ch"><h3><i class="ti ti-building"></i>Clínica</h3></div>
+            <div style="padding:1rem"><div class="fg">
+              <div class="ff"><label>Nombre</label><input value="Clínica Dental BigTooth"></div>
+              <div class="ff"><label>NIF</label><input value="B48123456"></div>
+              <div class="ff"><label>Teléfono</label><input value="+34 944 123 456"></div>
+              <div class="ff"><label>Email</label><input value="info@bigtooth.es"></div>
+              <div class="ff full"><label>Dirección</label><input value="C/ Lehendakari Aguirre 12, Deusto, Bilbao"></div>
+            </div><div style="text-align:right;margin-top:10px"><button class="btn bp bsm" onclick="toast('Datos guardados','s')"><i class="ti ti-device-floppy"></i> Guardar</button></div></div>
           </div>
         </div>
-        <div class="danger-zone admin-only-block">
+        <div class="dz admin-block">
           <h4><i class="ti ti-alert-triangle"></i> Zona de peligro</h4>
-          <p>Estas acciones son irreversibles. Solo el administrador puede realizarlas.</p>
-          <div class="flex gap-2">
-            <button class="btn btn-danger btn-sm" onclick="confirmDanger('exportar')"><i class="ti ti-database-export"></i> Exportar toda la BD</button>
-            <button class="btn btn-danger btn-sm" onclick="confirmDanger('borrar')"><i class="ti ti-trash"></i> Limpiar base de datos</button>
+          <p>Solo el administrador puede realizar estas acciones irreversibles.</p>
+          <div class="flex">
+            <button class="btn bd2 bsm" onclick="expCSV('t-pac','backup-bigtooth')"><i class="ti ti-database-export"></i> Exportar BD</button>
+            <button class="btn bd2 bsm" onclick="confirmar('Limpiar base de datos','¿Eliminar TODOS los datos? Esta acción es irreversible.',borrarTodo,'Borrar todo')"><i class="ti ti-trash"></i> Limpiar BD</button>
           </div>
         </div>
       </div>
 
     </div><!-- /main -->
-  </div><!-- /app-body -->
+  </div><!-- /abody -->
 </div><!-- /app -->
 
-<!-- ──────────────────────── MODALS ──────────────────────── -->
+<!-- MODALS -->
+<div class="mo" id="mcita"><div class="md">
+  <div class="mh"><h3><i class="ti ti-calendar-plus" style="color:var(--acc)"></i>Nueva cita</h3><button class="btn bsm bic" onclick="closeModal('mcita')"><i class="ti ti-x"></i></button></div>
+  <div class="mb"><div class="fg">
+    <div class="ff full"><label>Paciente</label><select id="cp"></select></div>
+    <div class="ff"><label>Fecha</label><input type="date" id="cf"></div>
+    <div class="ff"><label>Hora</label><input type="time" id="ch" value="09:00"></div>
+    <div class="ff"><label>Doctor</label><select id="cdo"><option>Dra. Eider Landa</option><option>Dr. Iñigo Mendoza</option></select></div>
+    <div class="ff"><label>Duración</label><select id="cdu"><option>30 min</option><option>45 min</option><option>60 min</option><option>90 min</option></select></div>
+    <div class="ff full"><label>Motivo / Tratamiento</label><input type="text" id="cm" placeholder="Revisión, Ortodoncia..."></div>
+    <div class="ff full"><label>Notas</label><textarea id="cn"></textarea></div>
+  </div></div>
+  <div class="mf"><button class="btn" onclick="closeModal('mcita')">Cancelar</button><button class="btn bp" onclick="guardarCita()"><i class="ti ti-device-floppy"></i> Guardar</button></div>
+</div></div>
 
-<!-- MODAL: Nueva cita -->
-<div class="modal-overlay" id="modal-cita">
-  <div class="modal">
-    <div class="modal-header"><h3><i class="ti ti-calendar-plus" style="margin-right:6px;color:var(--acc)"></i>Nueva cita</h3><button class="btn btn-sm btn-icon" onclick="closeModal('modal-cita')"><i class="ti ti-x"></i></button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-field full"><label>Paciente</label><select id="cita-paciente"><option value="">Seleccionar paciente...</option></select></div>
-        <div class="form-field"><label>Fecha</label><input type="date" id="cita-fecha"></div>
-        <div class="form-field"><label>Hora</label><input type="time" id="cita-hora" value="09:00"></div>
-        <div class="form-field"><label>Doctor</label><select><option>Dra. Eider Landa</option><option>Dr. Iñigo Mendoza</option></select></div>
-        <div class="form-field"><label>Duración</label><select><option>30 min</option><option>45 min</option><option>60 min</option><option>90 min</option><option>120 min</option></select></div>
-        <div class="form-field full"><label>Motivo / Tratamiento</label><input type="text" placeholder="Ej: Revisión general, Ortodoncia, Limpieza..."></div>
-        <div class="form-field full"><label>Notas</label><textarea placeholder="Notas adicionales para la cita..."></textarea></div>
+<div class="mo" id="mecita"><div class="md">
+  <div class="mh"><h3><i class="ti ti-calendar-event" style="color:var(--acc)"></i>Editar cita</h3><button class="btn bsm bic" onclick="closeModal('mecita')"><i class="ti ti-x"></i></button></div>
+  <div class="mb"><div class="fg">
+    <div class="ff full"><label>Paciente</label><select id="ecp"></select></div>
+    <div class="ff"><label>Fecha</label><input type="date" id="ecf"></div>
+    <div class="ff"><label>Hora</label><input type="time" id="ech"></div>
+    <div class="ff"><label>Doctor</label><select id="ecdo"><option>Dra. Eider Landa</option><option>Dr. Iñigo Mendoza</option></select></div>
+    <div class="ff"><label>Duración</label><select id="ecdu"><option>30 min</option><option>45 min</option><option>60 min</option><option>90 min</option></select></div>
+    <div class="ff full"><label>Motivo</label><input type="text" id="ecm"></div>
+    <div class="ff full"><label>Estado</label><select id="eces"><option>Pendiente</option><option>Confirmada</option><option>Completada</option><option>Cancelada</option></select></div>
+    <div class="ff full"><label>Notas</label><textarea id="ecn"></textarea></div>
+  </div></div>
+  <div class="mf"><button class="btn" onclick="closeModal('mecita')">Cancelar</button><button class="btn bp" onclick="guardarEditCita()"><i class="ti ti-device-floppy"></i> Guardar cambios</button></div>
+</div></div>
+
+<div class="mo" id="mpac"><div class="md">
+  <div class="mh"><h3><i class="ti ti-user-plus" style="color:var(--acc)"></i>Nuevo paciente</h3><button class="btn bsm bic" onclick="closeModal('mpac')"><i class="ti ti-x"></i></button></div>
+  <div class="mb"><div class="fg">
+    <div class="fsep">Datos personales</div>
+    <div class="ff"><label>Nombre completo</label><input id="pn"></div>
+    <div class="ff"><label>DNI / NIE</label><input id="pd" placeholder="12345678A"></div>
+    <div class="ff"><label>F. nacimiento</label><input type="date" id="pf"></div>
+    <div class="ff"><label>Teléfono</label><input id="pt" placeholder="+34 600 000 000"></div>
+    <div class="ff full"><label>Email</label><input type="email" id="pe"></div>
+    <div class="ff"><label>Zona</label><input id="pz" placeholder="Deusto, Getxo..."></div>
+    <div class="ff"><label>Dirección</label><input id="pdi"></div>
+    <div class="fsep">Historial médico</div>
+    <div class="ff full"><label>Alergias</label><input id="pa" placeholder="Penicilina... o Ninguna"></div>
+    <div class="ff full"><label>Medicación</label><input id="pm" placeholder="Omeprazol... o Ninguna"></div>
+    <div class="ff full"><label>Observaciones</label><textarea id="po"></textarea></div>
+  </div></div>
+  <div class="mf"><button class="btn" onclick="closeModal('mpac')">Cancelar</button><button class="btn bp" onclick="guardarPac()"><i class="ti ti-device-floppy"></i> Guardar</button></div>
+</div></div>
+
+<div class="mo" id="mtrat"><div class="md">
+  <div class="mh"><h3><i class="ti ti-tooth" style="color:var(--acc)"></i>Nuevo tratamiento</h3><button class="btn bsm bic" onclick="closeModal('mtrat')"><i class="ti ti-x"></i></button></div>
+  <div class="mb"><div class="fg">
+    <div class="ff full"><label>Paciente</label><select id="tp"></select></div>
+    <div class="ff full"><label>Tipo</label><select id="tt"><option>Ortodoncia</option><option>Implante dental</option><option>Limpieza bucal</option><option>Blanqueamiento</option><option>Extracción</option><option>Endodoncia</option><option>Prótesis</option><option>Revisión general</option><option>Periodoncia</option><option>Otro</option></select></div>
+    <div class="ff"><label>Doctor</label><select id="td"><option>Dra. Eider Landa</option><option>Dr. Iñigo Mendoza</option></select></div>
+    <div class="ff"><label>Fecha inicio</label><input type="date" id="ti2"></div>
+    <div class="ff"><label>Sesiones previstas</label><input type="number" id="ts" placeholder="6" min="1"></div>
+    <div class="ff"><label>Coste (€)</label><input type="number" id="tc2" placeholder="1200"></div>
+    <div class="ff full"><label>Notas clínicas</label><textarea id="tn"></textarea></div>
+    <div class="ff full"><label>Generar factura</label><select id="tfa"><option value="si">Sí — crear factura pendiente</option><option value="no">No</option></select></div>
+  </div></div>
+  <div class="mf"><button class="btn" onclick="closeModal('mtrat')">Cancelar</button><button class="btn bp" onclick="guardarTrat()"><i class="ti ti-device-floppy"></i> Guardar</button></div>
+</div></div>
+
+<div class="mo" id="mfac"><div class="md">
+  <div class="mh"><h3><i class="ti ti-receipt" style="color:var(--acc)"></i>Nueva factura</h3><button class="btn bsm bic" onclick="closeModal('mfac')"><i class="ti ti-x"></i></button></div>
+  <div class="mb"><div class="fg">
+    <div class="ff full"><label>Paciente</label><select id="fp"></select></div>
+    <div class="ff full"><label>Tratamiento</label><select id="ft2"></select></div>
+    <div class="ff"><label>Importe (€)</label><input type="number" id="fi" placeholder="380"></div>
+    <div class="ff"><label>Fecha</label><input type="date" id="ff2"></div>
+    <div class="ff"><label>IVA</label><select id="fiv"><option value="0">0% (exento)</option><option value="10">10%</option><option value="21">21%</option></select></div>
+    <div class="ff"><label>Estado</label><select id="fe"><option>Pendiente</option><option>Pagada</option><option>Vencida</option></select></div>
+    <div class="ff full"><label>Concepto</label><textarea id="fc"></textarea></div>
+  </div></div>
+  <div class="mf"><button class="btn" onclick="closeModal('mfac')">Cancelar</button><button class="btn bp" onclick="guardarFac()"><i class="ti ti-device-floppy"></i> Crear</button></div>
+</div></div>
+
+<div class="mo" id="mrx"><div class="md">
+  <div class="mh"><h3><i class="ti ti-scan" style="color:var(--acc)"></i>Subir radiografía</h3><button class="btn bsm bic" onclick="closeModal('mrx')"><i class="ti ti-x"></i></button></div>
+  <div class="mb"><div class="fg">
+    <div class="ff full"><label>Paciente</label><select id="xp"></select></div>
+    <div class="ff"><label>Tipo</label><select id="xt"><option>Panorámica</option><option>Periapical</option><option>Aleta mordida</option><option>Cefalométrica</option><option>TAC 3D</option></select></div>
+    <div class="ff"><label>Fecha</label><input type="date" id="xf"></div>
+    <div class="ff full"><label>Doctor</label><select id="xd"><option>Dra. Eider Landa</option><option>Dr. Iñigo Mendoza</option></select></div>
+    <div class="ff full"><label>Notas</label><textarea id="xn"></textarea></div>
+    <div class="ff full">
+      <label>Imagen (opcional)</label>
+      <div class="uz" id="uz" onclick="document.getElementById('xfile').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="rxDrop(event)">
+        <i class="ti ti-cloud-upload"></i><p>Arrastra o <strong>haz clic</strong> para seleccionar</p><span>JPG, PNG, DICOM · Máx 20MB</span>
       </div>
+      <input type="file" id="xfile" accept="image/*,.dcm" style="display:none" onchange="rxFileSelect(event)">
+      <div class="ufl" id="ufl"></div>
     </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-cita')">Cancelar</button><button class="btn btn-primary" onclick="guardarCita()"><i class="ti ti-device-floppy"></i> Guardar cita</button></div>
+  </div></div>
+  <div class="mf"><button class="btn" onclick="closeModal('mrx')">Cancelar</button><button class="btn bp" onclick="guardarRx()"><i class="ti ti-device-floppy"></i> Guardar</button></div>
+</div></div>
+
+<div class="mo" id="mficha"><div class="md mdlg">
+  <div class="mh"><h3 id="ficha-title">Ficha</h3><button class="btn bsm bic" onclick="closeModal('mficha')"><i class="ti ti-x"></i></button></div>
+  <div class="mb">
+    <div class="pic" id="ficha-card"></div>
+    <div class="ptabs">
+      <div class="ptab active" onclick="sPtab(this,'pt-tr')"><i class="ti ti-tooth"></i>Tratamientos</div>
+      <div class="ptab" onclick="sPtab(this,'pt-fa')"><i class="ti ti-receipt"></i>Facturas</div>
+      <div class="ptab" onclick="sPtab(this,'pt-rx')"><i class="ti ti-scan"></i>Radiografías</div>
+      <div class="ptab" onclick="sPtab(this,'pt-hi')"><i class="ti ti-file-medical"></i>Historial</div>
+    </div>
+    <div class="ptc active" id="pt-tr">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn bp bsm" onclick="closeModal('mficha');openModal('mtrat')"><i class="ti ti-plus"></i> Nuevo</button></div>
+      <table><thead><tr><th>Tipo</th><th>Doctor</th><th>Inicio</th><th>Sesiones</th><th>Coste</th><th>Estado</th></tr></thead><tbody id="ft-tr"></tbody></table>
+    </div>
+    <div class="ptc" id="pt-fa">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn bp bsm" onclick="closeModal('mficha');openModal('mfac')"><i class="ti ti-plus"></i> Nueva</button></div>
+      <table><thead><tr><th>Nº</th><th>Fecha</th><th>Concepto</th><th>Importe</th><th>Estado</th><th></th></tr></thead><tbody id="ft-fa"></tbody></table>
+    </div>
+    <div class="ptc" id="pt-rx">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn bp bsm" onclick="closeModal('mficha');openModal('mrx')"><i class="ti ti-plus"></i> Subir</button></div>
+      <div id="ft-rxg" class="xgrid" style="margin-top:8px"></div>
+    </div>
+    <div class="ptc" id="pt-hi"><div id="ft-hi" style="font-size:13px;line-height:1.9;color:var(--t2)"></div></div>
   </div>
-</div>
+  <div class="mf"><button class="btn" onclick="closeModal('mficha')">Cerrar</button></div>
+</div></div>
 
-<!-- MODAL: Nuevo paciente -->
-<div class="modal-overlay" id="modal-paciente">
-  <div class="modal">
-    <div class="modal-header"><h3><i class="ti ti-user-plus" style="margin-right:6px;color:var(--acc)"></i>Nuevo paciente</h3><button class="btn btn-sm btn-icon" onclick="closeModal('modal-paciente')"><i class="ti ti-x"></i></button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-section">Datos personales</div>
-        <div class="form-field"><label>Nombre</label><input type="text" id="pac-nombre" placeholder="Nombre completo"></div>
-        <div class="form-field"><label>DNI / NIE</label><input type="text" id="pac-dni" placeholder="12345678A"></div>
-        <div class="form-field"><label>Fecha de nacimiento</label><input type="date" id="pac-fnac"></div>
-        <div class="form-field"><label>Teléfono</label><input type="tel" id="pac-tel" placeholder="+34 600 000 000"></div>
-        <div class="form-field full"><label>Email</label><input type="email" id="pac-email" placeholder="paciente@email.com"></div>
-        <div class="form-field full"><label>Dirección</label><input type="text" id="pac-dir" placeholder="Calle, número, ciudad..."></div>
-        <div class="form-section">Historial médico</div>
-        <div class="form-field full"><label>Alergias</label><input type="text" id="pac-alergias" placeholder="Ej: penicilina, latex... o Ninguna"></div>
-        <div class="form-field full"><label>Medicación habitual</label><input type="text" id="pac-med" placeholder="Ej: Ibuprofeno, Omeprazol... o Ninguna"></div>
-        <div class="form-field full"><label>Observaciones</label><textarea id="pac-obs" placeholder="Antecedentes, condiciones especiales, historial previo..."></textarea></div>
-      </div>
-    </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-paciente')">Cancelar</button><button class="btn btn-primary" onclick="guardarPaciente()"><i class="ti ti-device-floppy"></i> Guardar paciente</button></div>
-  </div>
-</div>
-
-<!-- MODAL: Nuevo tratamiento -->
-<div class="modal-overlay" id="modal-tratamiento">
-  <div class="modal">
-    <div class="modal-header"><h3><i class="ti ti-tooth" style="margin-right:6px;color:var(--acc)"></i>Nuevo tratamiento</h3><button class="btn btn-sm btn-icon" onclick="closeModal('modal-tratamiento')"><i class="ti ti-x"></i></button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-field full"><label>Paciente</label><select id="trat-paciente"><option value="">Seleccionar paciente...</option></select></div>
-        <div class="form-field full"><label>Tipo de tratamiento</label><select id="trat-tipo">
-          <option>Ortodoncia</option><option>Implante dental</option><option>Limpieza bucal</option><option>Blanqueamiento</option><option>Extracción</option><option>Endodoncia</option><option>Prótesis</option><option>Revisión general</option><option>Otro</option>
-        </select></div>
-        <div class="form-field"><label>Doctor</label><select id="trat-doctor"><option>Dra. Eider Landa</option><option>Dr. Iñigo Mendoza</option></select></div>
-        <div class="form-field"><label>Fecha inicio</label><input type="date" id="trat-inicio"></div>
-        <div class="form-field"><label>Sesiones previstas</label><input type="number" id="trat-sesiones" placeholder="Ej: 6" min="1"></div>
-        <div class="form-field"><label>Coste total (€)</label><input type="number" id="trat-coste" placeholder="Ej: 1200" min="0"></div>
-        <div class="form-field full"><label>Notas clínicas</label><textarea id="trat-notas" placeholder="Descripción, observaciones clínicas, plan de tratamiento..."></textarea></div>
-        <div class="form-field full">
-          <label>Generar factura automáticamente</label>
-          <select id="trat-factura-auto">
-            <option value="si">Sí — crear factura pendiente</option>
-            <option value="no">No — solo registrar el tratamiento</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-tratamiento')">Cancelar</button><button class="btn btn-primary" onclick="guardarTratamiento()"><i class="ti ti-device-floppy"></i> Guardar tratamiento</button></div>
-  </div>
-</div>
-
-<!-- MODAL: Nueva factura -->
-<div class="modal-overlay" id="modal-factura">
-  <div class="modal">
-    <div class="modal-header"><h3><i class="ti ti-receipt" style="margin-right:6px;color:var(--acc)"></i>Nueva factura</h3><button class="btn btn-sm btn-icon" onclick="closeModal('modal-factura')"><i class="ti ti-x"></i></button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-field full"><label>Paciente</label><select id="fac-paciente"><option value="">Seleccionar paciente...</option></select></div>
-        <div class="form-field full"><label>Tratamiento asociado (opcional)</label><select id="fac-tratamiento"><option value="">Sin tratamiento específico</option></select></div>
-        <div class="form-field"><label>Importe (€)</label><input type="number" id="fac-importe" placeholder="Ej: 380" min="0"></div>
-        <div class="form-field"><label>Fecha</label><input type="date" id="fac-fecha"></div>
-        <div class="form-field"><label>IVA (%)</label><select id="fac-iva"><option value="0">0% (exento sanitario)</option><option value="10">10%</option><option value="21">21%</option></select></div>
-        <div class="form-field"><label>Estado</label><select id="fac-estado"><option value="Pendiente">Pendiente</option><option value="Pagada">Pagada</option><option value="Vencida">Vencida</option></select></div>
-        <div class="form-field full"><label>Concepto / Descripción</label><textarea id="fac-concepto" placeholder="Descripción de los servicios facturados..."></textarea></div>
-      </div>
-    </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-factura')">Cancelar</button><button class="btn btn-primary" onclick="guardarFactura()"><i class="ti ti-device-floppy"></i> Crear factura</button></div>
-  </div>
-</div>
-
-<!-- MODAL: Subir radiografía -->
-<div class="modal-overlay" id="modal-radiografia">
-  <div class="modal">
-    <div class="modal-header"><h3><i class="ti ti-scan" style="margin-right:6px;color:var(--acc)"></i>Subir radiografía</h3><button class="btn btn-sm btn-icon" onclick="closeModal('modal-radiografia')"><i class="ti ti-x"></i></button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-field full"><label>Paciente</label><select id="xray-paciente"><option value="">Seleccionar paciente...</option></select></div>
-        <div class="form-field"><label>Tipo</label><select id="xray-tipo"><option>Panorámica</option><option>Periapical</option><option>Aleta mordida</option><option>Cefalométrica</option><option>TAC 3D</option></select></div>
-        <div class="form-field"><label>Fecha</label><input type="date" id="xray-fecha"></div>
-        <div class="form-field"><label>Doctor</label><select><option>Dra. Eider Landa</option><option>Dr. Iñigo Mendoza</option></select></div>
-        <div class="form-field full"><label>Notas</label><textarea id="xray-notas" placeholder="Observaciones clínicas sobre la radiografía..."></textarea></div>
-        <div class="form-field full">
-          <label>Archivo de imagen</label>
-          <div class="upload-zone" id="upload-zone" onclick="document.getElementById('xray-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
-            <i class="ti ti-cloud-upload"></i>
-            <p>Arrastra la imagen aquí o <strong>haz clic para seleccionar</strong></p>
-            <span>JPG, PNG, DICOM · Máx. 20MB</span>
-          </div>
-          <input type="file" id="xray-file" accept="image/*,.dcm" style="display:none" onchange="handleFileSelect(event)">
-          <div class="uploaded-files" id="uploaded-files-list"></div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-radiografia')">Cancelar</button><button class="btn btn-primary" onclick="guardarRadiografia()"><i class="ti ti-device-floppy"></i> Guardar radiografía</button></div>
-  </div>
-</div>
-
-<!-- MODAL: Ficha de paciente -->
-<div class="modal-overlay" id="modal-ficha-paciente">
-  <div class="modal modal-lg">
-    <div class="modal-header">
-      <h3 id="ficha-titulo">Ficha del paciente</h3>
-      <button class="btn btn-sm btn-icon" onclick="closeModal('modal-ficha-paciente')"><i class="ti ti-x"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="patient-info-card" id="ficha-info"></div>
-      <div class="patient-tabs">
-        <div class="ptab active" onclick="switchPtab(this,'ptab-tratamientos')"><i class="ti ti-tooth"></i> Tratamientos</div>
-        <div class="ptab" onclick="switchPtab(this,'ptab-facturas')"><i class="ti ti-receipt"></i> Facturas</div>
-        <div class="ptab" onclick="switchPtab(this,'ptab-radiografias')"><i class="ti ti-scan"></i> Radiografías</div>
-        <div class="ptab" onclick="switchPtab(this,'ptab-historial')"><i class="ti ti-file-medical"></i> Historial</div>
-      </div>
-      <div class="ptab-content active" id="ptab-tratamientos">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-          <button class="btn btn-sm btn-primary" onclick="closeModal('modal-ficha-paciente');openModal('modal-tratamiento')"><i class="ti ti-plus"></i> Nuevo tratamiento</button>
-        </div>
-        <table id="ficha-tabla-tratamientos"><thead><tr><th>Tipo</th><th>Doctor</th><th>Inicio</th><th>Sesiones</th><th>Coste</th><th>Estado</th></tr></thead><tbody id="ficha-tbody-tratamientos"></tbody></table>
-      </div>
-      <div class="ptab-content" id="ptab-facturas">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-          <button class="btn btn-sm btn-primary" onclick="closeModal('modal-ficha-paciente');openModal('modal-factura')"><i class="ti ti-plus"></i> Nueva factura</button>
-        </div>
-        <table id="ficha-tabla-facturas"><thead><tr><th>Nº</th><th>Fecha</th><th>Concepto</th><th>Importe</th><th>Estado</th></tr></thead><tbody id="ficha-tbody-facturas"></tbody></table>
-      </div>
-      <div class="ptab-content" id="ptab-radiografias">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-          <button class="btn btn-sm btn-primary" onclick="closeModal('modal-ficha-paciente');openModal('modal-radiografia')"><i class="ti ti-plus"></i> Subir radiografía</button>
-        </div>
-        <div id="ficha-xray-grid" class="xray-grid" style="margin-top:8px"></div>
-      </div>
-      <div class="ptab-content" id="ptab-historial">
-        <div id="ficha-historial" style="font-size:13px;color:var(--t2);line-height:1.8"></div>
-      </div>
-    </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-ficha-paciente')">Cerrar</button></div>
-  </div>
-</div>
-
-<!-- VISOR RADIOGRAFÍAS -->
-<div class="xray-viewer" id="xray-viewer" onclick="if(event.target===this)closeViewer()">
-  <div>
-    <div style="text-align:right;margin-bottom:8px">
-      <button class="btn btn-sm" style="color:white;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)" onclick="closeViewer()"><i class="ti ti-x"></i> Cerrar</button>
-    </div>
-    <div class="xray-viewer-placeholder" id="viewer-placeholder">
-      <i class="ti ti-scan"></i>
-      <p id="viewer-label">Radiografía</p>
-    </div>
-    <img class="xray-viewer-img" id="viewer-img" style="display:none">
-    <div class="xray-viewer-info" id="viewer-info"></div>
-    <div class="xray-viewer-controls">
-      <button class="btn btn-sm" style="color:white;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)" onclick="openModal('modal-radiografia');closeViewer()"><i class="ti ti-upload"></i> Subir nueva</button>
-      <button class="btn btn-sm" style="color:white;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)"><i class="ti ti-download"></i> Descargar</button>
+<!-- VISOR RX -->
+<div class="xv" id="xv" onclick="if(event.target===this)closeViewer()">
+  <div class="xvi">
+    <button class="vb vbc" onclick="closeViewer()"><i class="ti ti-x"></i> Cerrar</button>
+    <div class="xvph" id="xvph"><i class="ti ti-scan"></i><p id="xvphl">Radiografía</p></div>
+    <img class="xvimg" id="xvimg">
+    <div class="xvinfo" id="xvinfo"></div>
+    <div class="xvc">
+      <button class="vb" onclick="openModal('mrx');closeViewer()"><i class="ti ti-upload"></i> Subir nueva</button>
+      <button class="vb" id="vdl"><i class="ti ti-download"></i> Descargar</button>
     </div>
   </div>
 </div>
-
 <script>
-// ═══════════════════════════════════════════════════════════
-// SISTEMA DE AUTENTICACIÓN
-// ═══════════════════════════════════════════════════════════
-const USERS = {
-  admin:     { pass:'admin123', role:'admin',    name:'Dr. Administrador', initials:'DA' },
-  recepcion: { pass:'rec123',   role:'employee', name:'Recepción',         initials:'R'  }
-};
-
-let currentUser = null;
-let currentRole = null;
-
+// ── AUTH ──
+const USERS={admin:{pass:'admin123',role:'admin',name:'Dr. Admin',init:'DA'},recepcion:{pass:'rec123',role:'employee',name:'Recepción',init:'R'}};
+let CU=null;
 function doLogin(){
-  const u = document.getElementById('login-user').value.trim().toLowerCase();
-  const p = document.getElementById('login-pass').value;
-  const err = document.getElementById('login-error');
-  if(USERS[u] && USERS[u].pass === p){
-    currentUser = USERS[u];
-    currentRole = USERS[u].role;
-    document.body.classList.add('role-'+currentRole);
+  const u=document.getElementById('lu').value.trim().toLowerCase();
+  const p=document.getElementById('lp').value;
+  if(USERS[u]&&USERS[u].pass===p){
+    CU=USERS[u];document.body.classList.toggle('is-admin',CU.role==='admin');
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').classList.add('visible');
-    document.getElementById('role-badge').textContent = currentRole==='admin'?'Admin':'Recepción';
-    document.getElementById('role-badge').className = 'role-badge '+(currentRole==='admin'?'admin':'employee');
-    document.getElementById('user-name').textContent = currentUser.name.split(' ')[0];
-    document.getElementById('user-avatar').textContent = currentUser.initials;
-    err.classList.remove('show');
+    document.getElementById('rbadge').textContent=CU.role==='admin'?'Admin':'Recepción';
+    document.getElementById('rbadge').className='rbadge '+(CU.role==='admin'?'rba':'rbe');
+    document.getElementById('uname').textContent=CU.name.split(' ')[0];
+    document.getElementById('uav').textContent=CU.init;
+    document.getElementById('lerr').classList.remove('show');
     initApp();
-  } else {
-    err.classList.add('show');
-    document.getElementById('login-pass').value='';
-  }
+  }else{document.getElementById('lerr').classList.add('show');document.getElementById('lp').value='';}
 }
+function doLogout(){CU=null;document.body.classList.remove('is-admin');document.getElementById('login-screen').style.display='flex';document.getElementById('app').classList.remove('visible');}
 
-function doLogout(){
-  currentUser=null; currentRole=null;
-  document.body.classList.remove('role-admin','role-employee');
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('app').classList.remove('visible');
-  document.getElementById('login-user').value='';
-  document.getElementById('login-pass').value='';
-}
-
-// ═══════════════════════════════════════════════════════════
-// BASE DE DATOS LOCAL (Shared State)
-// ═══════════════════════════════════════════════════════════
-const DB = {
-  pacientes: [
-    {id:1, nombre:'Ane Txakartegi Iturri',   dni:'72345678A', tel:'+34 666 112 233', email:'ane.txakartegi@gmail.com', dir:'C/ Gran Vía 45, Bilbao', fnac:'1985-03-15', alergias:'Ninguna', med:'Ninguna', obs:'Paciente habitual. Revisiones anuales.', estado:'Activo'},
-    {id:2, nombre:'Mikel Garate Uriarte',     dni:'16234567B', tel:'+34 644 223 344', email:'mikel.garate@hotmail.com', dir:'Av. Lehendakari Agirre 23, Deusto', fnac:'1990-07-22', alergias:'Penicilina', med:'Ninguna', obs:'Tratamiento de ortodoncia en curso.', estado:'En tratamiento'},
-    {id:3, nombre:'Leire Iturriaga Etxebarria',dni:'30123456C',tel:'+34 655 334 455',email:'leire.itu@gmail.com', dir:'C/ Iturribide 8, Bilbao', fnac:'1978-11-03', alergias:'Latex', med:'Omeprazol 20mg', obs:'Hipersensibilidad dental.', estado:'En tratamiento'},
-    {id:4, nombre:'Jon Urrutia Sarasua',      dni:'22987654D', tel:'+34 688 445 566', email:'jon.urrutia@outlook.com', dir:'C/ Licenciado Poza 60, Bilbao', fnac:'1995-02-28', alergias:'Ninguna', med:'Ninguna', obs:'Nuevo paciente. Derivado por médico de cabecera.', estado:'Alta reciente'},
-    {id:5, nombre:'Amaia Basauri Mendikote',  dni:'14876543E', tel:'+34 677 556 677', email:'amaia.basauri@gmail.com', dir:'Paseo Abandoibarra 7, Bilbao', fnac:'1982-09-14', alergias:'Ibuprofeno', med:'Aspirina 100mg', obs:'Fase 1 de implante. Pendiente oseointegración.', estado:'En tratamiento'},
-    {id:6, nombre:'Gorka Etxebarria Landa',   dni:'36765432F', tel:'+34 699 667 788', email:'gorka.e@gmail.com', dir:'C/ Autonomía 22, Bilbao', fnac:'1970-05-30', alergias:'Ninguna', med:'Metformina', obs:'Diabetes controlada. Cicatrización más lenta.', estado:'Activo'},
+// ── DB ──
+const DB={
+  pacientes:[
+    {id:1,nombre:'Ane Txakartegi Iturri',   dni:'72345678A',tel:'+34 666 112 233',email:'ane@gmail.com',zona:'Deusto',dir:'C/ Gran Vía 45',fnac:'1985-03-15',alg:'Ninguna',med:'Ninguna',obs:'Paciente habitual.',estado:'Activo',ca:'2025-01-10'},
+    {id:2,nombre:'Mikel Garate Uriarte',     dni:'16234567B',tel:'+34 644 223 344',email:'mikel@hotmail.com',zona:'Bilbao',dir:'Av. Lehendakari Agirre 23',fnac:'1990-07-22',alg:'Penicilina',med:'Ninguna',obs:'Ortodoncia en curso.',estado:'En tratamiento',ca:'2025-03-05'},
+    {id:3,nombre:'Leire Iturriaga Etxebarria',dni:'30123456C',tel:'+34 655 334 455',email:'leire@gmail.com',zona:'Rekalde',dir:'C/ Iturribide 8',fnac:'1978-11-03',alg:'Latex',med:'Omeprazol 20mg',obs:'Hipersensibilidad dental.',estado:'En tratamiento',ca:'2025-04-12'},
+    {id:4,nombre:'Jon Urrutia Sarasua',      dni:'22987654D',tel:'+34 688 445 566',email:'jon@outlook.com',zona:'Getxo',dir:'C/ Licenciado Poza 60',fnac:'1995-02-28',alg:'Ninguna',med:'Ninguna',obs:'Nuevo paciente.',estado:'Alta reciente',ca:'2026-06-01'},
+    {id:5,nombre:'Amaia Basauri Mendikote',  dni:'14876543E',tel:'+34 677 556 677',email:'amaia@gmail.com',zona:'Basauri',dir:'Paseo Abandoibarra 7',fnac:'1982-09-14',alg:'Ibuprofeno',med:'Aspirina 100mg',obs:'Implante en oseointegración.',estado:'En tratamiento',ca:'2025-11-20'},
+    {id:6,nombre:'Gorka Etxebarria Landa',   dni:'36765432F',tel:'+34 699 667 788',email:'gorka@gmail.com',zona:'Deusto',dir:'C/ Autonomía 22',fnac:'1970-05-30',alg:'Ninguna',med:'Metformina',obs:'Diabetes controlada.',estado:'Activo',ca:'2025-02-15'},
   ],
-  tratamientos: [
-    {id:1, pacienteId:2, tipo:'Ortodoncia',          doctor:'Dr. Iñigo Mendoza',  inicio:'2026-01-10', sesiones:12, sesionesHechas:5, coste:2400, estado:'En curso',    facturaId:1, notas:'Brackets cerámicos. Control mensual.'},
-    {id:2, pacienteId:3, tipo:'Limpieza bucal',       doctor:'Dra. Eider Landa',   inicio:'2026-05-20', sesiones:1,  sesionesHechas:1, coste:80,   estado:'Completado', facturaId:2, notas:'Limpieza semestral estándar.'},
-    {id:3, pacienteId:5, tipo:'Implante dental',      doctor:'Dr. Iñigo Mendoza',  inicio:'2026-04-05', sesiones:4,  sesionesHechas:2, coste:1800, estado:'En curso',    facturaId:3, notas:'Implante en posición 36. Fase cicatrización.'},
-    {id:4, pacienteId:1, tipo:'Blanqueamiento',       doctor:'Dra. Eider Landa',   inicio:'2026-06-01', sesiones:3,  sesionesHechas:3, coste:320,  estado:'Completado', facturaId:4, notas:'Blanqueamiento LED. Resultado excelente.'},
-    {id:5, pacienteId:4, tipo:'Extracción molar',    doctor:'Dr. Iñigo Mendoza',  inicio:'2026-06-28', sesiones:1,  sesionesHechas:0, coste:150,  estado:'Pendiente',   facturaId:5, notas:'Extracción molar 48. Programada para hoy.'},
-    {id:6, pacienteId:6, tipo:'Prótesis parcial',    doctor:'Dra. Eider Landa',   inicio:'2026-03-15', sesiones:3,  sesionesHechas:3, coste:960,  estado:'Completado', facturaId:6, notas:'Prótesis inferior removible. Adaptación correcta.'},
+  citas:[
+    {id:1,pacienteId:1,fecha:'2026-06-28',hora:'09:00',doctor:'Dra. Eider Landa',motivo:'Revisión general',dur:'30 min',estado:'Confirmada',notas:'',origen:'CRM'},
+    {id:2,pacienteId:2,fecha:'2026-06-28',hora:'10:30',doctor:'Dr. Iñigo Mendoza',motivo:'Control ortodoncia',dur:'45 min',estado:'Confirmada',notas:'',origen:'CRM'},
+    {id:3,pacienteId:3,fecha:'2026-06-28',hora:'12:00',doctor:'Dra. Eider Landa',motivo:'Limpieza bucal',dur:'60 min',estado:'Pendiente',notas:'Hipersensibilidad',origen:'CRM'},
+    {id:4,pacienteId:4,fecha:'2026-06-28',hora:'16:00',doctor:'Dr. Iñigo Mendoza',motivo:'Extracción molar',dur:'45 min',estado:'Confirmada',notas:'',origen:'CRM'},
+    {id:5,pacienteId:5,fecha:'2026-06-28',hora:'17:30',doctor:'Dra. Eider Landa',motivo:'Implante fase 2',dur:'90 min',estado:'Pendiente',notas:'',origen:'CRM'},
   ],
-  facturas: [
-    {id:1, num:'BT-2026-001', pacienteId:2, tratamientoId:1, fecha:'2026-01-10', importe:2400, iva:0, concepto:'Ortodoncia completa con brackets cerámicos',     estado:'Pendiente'},
-    {id:2, num:'BT-2026-002', pacienteId:3, tratamientoId:2, fecha:'2026-05-20', importe:80,   iva:0, concepto:'Limpieza bucal profesional semestral',           estado:'Pagada'},
-    {id:3, num:'BT-2026-003', pacienteId:5, tratamientoId:3, fecha:'2026-04-05', importe:1800, iva:0, concepto:'Implante dental - fase quirúrgica y prótesis',    estado:'Pendiente'},
-    {id:4, num:'BT-2026-004', pacienteId:1, tratamientoId:4, fecha:'2026-06-01', importe:320,  iva:0, concepto:'Blanqueamiento dental LED 3 sesiones',            estado:'Pagada'},
-    {id:5, num:'BT-2026-005', pacienteId:4, tratamientoId:5, fecha:'2026-06-28', importe:150,  iva:0, concepto:'Extracción quirúrgica molar del juicio',          estado:'Pendiente'},
-    {id:6, num:'BT-2026-006', pacienteId:6, tratamientoId:6, fecha:'2026-03-15', importe:960,  iva:0, concepto:'Prótesis parcial removible inferior',             estado:'Pagada'},
+  tratamientos:[
+    {id:1,pacienteId:2,tipo:'Ortodoncia',      doctor:'Dr. Iñigo Mendoza',inicio:'2026-01-10',ses:12,sesH:5,coste:2400,estado:'En curso',facId:1,notas:'Brackets cerámicos.'},
+    {id:2,pacienteId:3,tipo:'Limpieza bucal',  doctor:'Dra. Eider Landa', inicio:'2026-05-20',ses:1, sesH:1,coste:80,  estado:'Completado',facId:2,notas:'Semestral.'},
+    {id:3,pacienteId:5,tipo:'Implante dental', doctor:'Dr. Iñigo Mendoza',inicio:'2026-04-05',ses:4, sesH:2,coste:1800,estado:'En curso',facId:3,notas:'Posición 36.'},
+    {id:4,pacienteId:1,tipo:'Blanqueamiento',  doctor:'Dra. Eider Landa', inicio:'2026-06-01',ses:3, sesH:3,coste:320, estado:'Completado',facId:4,notas:'LED 3 sesiones.'},
+    {id:5,pacienteId:4,tipo:'Extracción molar',doctor:'Dr. Iñigo Mendoza',inicio:'2026-06-28',ses:1, sesH:0,coste:150, estado:'Pendiente',facId:5,notas:'Molar 48.'},
+    {id:6,pacienteId:6,tipo:'Prótesis parcial',doctor:'Dra. Eider Landa', inicio:'2026-03-15',ses:3, sesH:3,coste:960, estado:'Completado',facId:6,notas:'Inferior removible.'},
   ],
-  radiografias: [
-    {id:1, pacienteId:2, tipo:'Panorámica',     fecha:'2026-01-10', doctor:'Dr. Iñigo Mendoza', notas:'Valoración inicial ortodoncia. Maloclusión clase II.',            archivo:null},
-    {id:2, pacienteId:3, tipo:'Periapical',     fecha:'2026-05-20', doctor:'Dra. Eider Landa',  notas:'Control caries interproximal. Tratada.',                           archivo:null},
-    {id:3, pacienteId:5, tipo:'TAC 3D',         fecha:'2026-04-01', doctor:'Dr. Iñigo Mendoza', notas:'Planificación implante. Hueso disponible 8mm x 6mm.',              archivo:null},
-    {id:4, pacienteId:1, tipo:'Aleta mordida',  fecha:'2026-06-01', doctor:'Dra. Eider Landa',  notas:'Control sextantes. Sin caries activas.',                           archivo:null},
-    {id:5, pacienteId:6, tipo:'Panorámica',     fecha:'2026-03-01', doctor:'Dra. Eider Landa',  notas:'Planificación prótesis. Piezas ausentes 35, 36, 37.',              archivo:null},
-    {id:6, pacienteId:4, tipo:'Periapical',     fecha:'2026-06-25', doctor:'Dr. Iñigo Mendoza', notas:'Valoración molar 48. Impactación distal. Extracción indicada.',    archivo:null},
+  facturas:[
+    {id:1,num:'BT-2026-001',pacienteId:2,tratId:1,fecha:'2026-01-10',imp:2400,concepto:'Ortodoncia completa con brackets cerámicos',estado:'Pendiente'},
+    {id:2,num:'BT-2026-002',pacienteId:3,tratId:2,fecha:'2026-05-20',imp:80,  concepto:'Limpieza bucal profesional semestral',   estado:'Pagada'},
+    {id:3,num:'BT-2026-003',pacienteId:5,tratId:3,fecha:'2026-04-05',imp:1800,concepto:'Implante dental — cirugía y prótesis',    estado:'Pendiente'},
+    {id:4,num:'BT-2026-004',pacienteId:1,tratId:4,fecha:'2026-06-01',imp:320, concepto:'Blanqueamiento dental LED 3 sesiones',   estado:'Pagada'},
+    {id:5,num:'BT-2026-005',pacienteId:4,tratId:5,fecha:'2026-06-28',imp:150, concepto:'Extracción quirúrgica molar del juicio', estado:'Pendiente'},
+    {id:6,num:'BT-2026-006',pacienteId:6,tratId:6,fecha:'2026-03-15',imp:960, concepto:'Prótesis parcial removible inferior',    estado:'Pagada'},
   ],
-  nextFacturaId: 7,
-  nextTratId: 7,
-  nextXrayId: 7,
-  nextPacId: 7,
+  radiografias:[
+    {id:1,pacienteId:2,tipo:'Panorámica',   fecha:'2026-01-10',doctor:'Dr. Iñigo Mendoza',notas:'Valoración inicial ortodoncia.',archivo:null},
+    {id:2,pacienteId:3,tipo:'Periapical',   fecha:'2026-05-20',doctor:'Dra. Eider Landa', notas:'Control caries interproximal.',archivo:null},
+    {id:3,pacienteId:5,tipo:'TAC 3D',       fecha:'2026-04-01',doctor:'Dr. Iñigo Mendoza',notas:'Planificación implante.',     archivo:null},
+    {id:4,pacienteId:1,tipo:'Aleta mordida',fecha:'2026-06-01',doctor:'Dra. Eider Landa', notas:'Sin caries activas.',        archivo:null},
+    {id:5,pacienteId:6,tipo:'Panorámica',   fecha:'2026-03-01',doctor:'Dra. Eider Landa', notas:'Piezas ausentes 35,36,37.',  archivo:null},
+    {id:6,pacienteId:4,tipo:'Periapical',   fecha:'2026-06-25',doctor:'Dr. Iñigo Mendoza',notas:'Molar 48 impactado.',        archivo:null},
+  ],
+  nFac:7,nTrat:7,nRx:7,nPac:7,nCita:7
 };
+const CH={};
 
-// ═══════════════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════════════
-function getPaciente(id){ return DB.pacientes.find(p=>p.id===id)||{nombre:'—',id:0}; }
-function getTratamiento(id){ return DB.tratamientos.find(t=>t.id===id)||null; }
-function getFactura(id){ return DB.facturas.find(f=>f.id===id)||null; }
+// ── HELPERS ──
+const gPac =(id)=>DB.pacientes.find(p=>p.id===id)||{nombre:'—'};
+const gTrat=(id)=>DB.tratamientos.find(t=>t.id===id)||null;
+const gFac =(id)=>DB.facturas.find(f=>f.id===id)||null;
 
-function badgeEstado(estado){
-  const map = {
-    'Pagada':'badge-green','Completado':'badge-green','Activo':'badge-green','Alta reciente':'badge-green',
-    'Pendiente':'badge-yellow','En curso':'badge-blue','En tratamiento':'badge-blue',
-    'Vencida':'badge-red','Cancelado':'badge-red'
-  };
-  return `<span class="badge ${map[estado]||'badge-gray'}">${estado}</span>`;
+function bdg(e){const m={'Pagada':'bg2','Completado':'bg2','Activo':'bg2','Alta reciente':'bg2','Confirmada':'bg2','Completada':'bg2','Pendiente':'by2','En curso':'bb2','En tratamiento':'bb2','Vencida':'br2','Cancelada':'br2','Cancelado':'br2','Web':'bgr2','CRM':'bgr2'};return`<span class="badge ${m[e]||'bgr2'}">${e}</span>`;}
+function fd(d){if(!d)return'—';const[y,m,dd]=d.split('-');return`${dd}/${m}/${y}`;}
+function today(){return new Date().toISOString().split('T')[0];}
+
+function toast(msg,t='s'){
+  const el=document.createElement('div');
+  el.className=`ts ts-${t}`;
+  el.innerHTML=`<i class="ti ti-${t==='s'?'check':t==='e'?'alert-circle':'info-circle'}"></i> ${msg}`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.style.opacity='0',2600);setTimeout(()=>el.remove(),3000);
 }
 
-function formatDate(d){
-  if(!d)return '—';
-  const [y,m,day]=d.split('-');
-  return `${day}/${m}/${y}`;
+let _cb=null;
+function confirmar(tit,msg,cb,lbl='Eliminar'){
+  document.getElementById('ctitle').textContent=tit;document.getElementById('cmsg').textContent=msg;
+  document.getElementById('cok').textContent=lbl;_cb=cb;document.getElementById('cov').classList.add('open');
+}
+function closeConfirm(){document.getElementById('cov').classList.remove('open');_cb=null;}
+document.getElementById('cok').onclick=()=>{if(_cb)_cb();closeConfirm();};
+
+function addAct(ico,bg,col,tit,sub){
+  const l=document.getElementById('actlist');const d=document.createElement('div');d.className='ai';
+  d.innerHTML=`<div class="aico" style="background:${bg}"><i class="ti ${ico}" style="color:${col};font-size:13px"></i></div><div class="atx"><strong>${tit}</strong><p>${sub}</p></div><span class="atm">Ahora</span>`;
+  l.insertBefore(d,l.firstChild);if(l.children.length>8)l.removeChild(l.lastChild);
 }
 
-function today(){
-  return new Date().toISOString().split('T')[0];
+function updBadges(){
+  const fp=DB.facturas.filter(f=>f.estado!=='Pagada').length;
+  document.getElementById('badge-fac').textContent=fp;
+  const cp=DB.citas.filter(c=>c.estado==='Pendiente').length;
+  const ba=document.getElementById('badge-agenda');
+  if(cp>0){ba.textContent=cp;ba.style.display='';}else ba.style.display='none';
 }
 
-function toast(msg,type='success'){
-  const t=document.createElement('div');
-  t.className=`toast toast-${type}`;
-  t.innerHTML=`<i class="ti ti-${type==='success'?'check':'info-circle'}"></i> ${msg}`;
-  document.getElementById('toasts').appendChild(t);
-  setTimeout(()=>t.remove(),3000);
+function updKPIs(){
+  const tot=DB.facturas.reduce((s,f)=>s+f.imp,0);
+  const cob=DB.facturas.filter(f=>f.estado==='Pagada').reduce((s,f)=>s+f.imp,0);
+  const pen=DB.facturas.filter(f=>f.estado!=='Pagada').reduce((s,f)=>s+f.imp,0);
+  const np=DB.facturas.filter(f=>f.estado!=='Pagada').length;
+  document.getElementById('kpi-pac').textContent=DB.pacientes.length;
+  document.getElementById('kpi-pac-s').textContent=DB.pacientes.filter(p=>p.estado==='En tratamiento').length+' en tratamiento';
+  document.getElementById('kpi-cit').textContent=DB.citas.filter(c=>c.estado==='Pendiente').length;
+  document.getElementById('kpi-cit-s').textContent=DB.citas.length+' citas totales';
+  document.getElementById('kpi-tot').textContent=tot.toLocaleString('es-ES')+'€';
+  document.getElementById('kpi-cob-s').textContent='Cobrado: '+cob.toLocaleString('es-ES')+'€';
+  document.getElementById('kpi-pen').textContent=pen.toLocaleString('es-ES')+'€';
+  document.getElementById('kpi-pen-s').textContent=np+' facturas sin cobrar';
+  updBadges();
 }
 
-function updateBadgePendiente(){
-  const n=DB.facturas.filter(f=>f.estado==='Pendiente'||f.estado==='Vencida').length;
-  document.getElementById('badge-pendiente').textContent=n;
+function poblarSels(){
+  const opts='<option value="">Seleccionar paciente...</option>'+DB.pacientes.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
+  ['cp','ecp','tp','fp','xp'].forEach(id=>{const el=document.getElementById(id);if(el){const v=el.value;el.innerHTML=opts;el.value=v;}});
+  const ft=document.getElementById('ft2');
+  if(ft){ft.innerHTML='<option value="">Sin tratamiento</option>'+DB.tratamientos.map(t=>`<option value="${t.id}">${gPac(t.pacienteId).nombre} · ${t.tipo}</option>`).join('');}
+  const rxfp=document.getElementById('rx-fp');
+  if(rxfp){const v=rxfp.value;rxfp.innerHTML='<option value="">Todos los pacientes</option>'+DB.pacientes.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');rxfp.value=v;}
 }
 
-// ═══════════════════════════════════════════════════════════
-// NAVEGACIÓN
-// ═══════════════════════════════════════════════════════════
-function showPage(id, el){
+// ── NAVEGACIÓN ──
+const PT={dashboard:'Dashboard',agenda:'Agenda',pacientes:'Pacientes',tratamientos:'Tratamientos',radiografias:'Radiografías',facturas:'Facturas',contabilidad:'Contabilidad',captacion:'Captación',ajustes:'Ajustes'};
+function showPage(id,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.querySelectorAll('.sbi').forEach(i=>i.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  if(el) el.classList.add('active');
-  const titles={dashboard:'Dashboard',agenda:'Agenda',pacientes:'Pacientes',tratamientos:'Tratamientos',radiografias:'Radiografías',facturas:'Facturas',contabilidad:'Contabilidad',ajustes:'Ajustes'};
-  document.getElementById('topbar-title').textContent=titles[id]||id;
-  if(id==='pacientes')renderPacientes();
-  if(id==='tratamientos')renderTratamientos();
-  if(id==='facturas')renderFacturas();
-  if(id==='radiografias')renderRadiografias();
-  if(id==='contabilidad')renderContabilidad();
+  if(el)el.classList.add('active');
+  document.getElementById('ttitle').textContent=PT[id]||id;
+  if(id==='agenda')rAgenda();
+  if(id==='pacientes')rPac();
+  if(id==='tratamientos')rTrat();
+  if(id==='facturas')rFac();
+  if(id==='radiografias'){poblarSels();rxRender();}
+  if(id==='contabilidad')rContab();
+  if(id==='captacion')rCapt();
+}
+function sTab(el,cid){
+  el.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));document.getElementById(cid).classList.add('active');
+  if(cid==='tc-evo'){rChEvo();rChStk();}
+  if(cid==='tc-tip'){rChDon();rTipos();}
+  if(cid==='tc-est')rEst();
+  if(cid==='tc-pac')rCPac();
+}
+function sPtab(el,cid){
+  el.closest('.ptabs').querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  document.querySelectorAll('.ptc').forEach(c=>c.classList.remove('active'));document.getElementById(cid).classList.add('active');
 }
 
-function switchTab(el,contentId){
-  el.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-  document.getElementById(contentId).classList.add('active');
-}
+// ── SYNC CITAS WEB ──
+const API_CITAS='https://clinica-bigtooth.netlify.app/api/citas';
+let lastSync=null;
 
-function switchPtab(el,contentId){
-  el.closest('.patient-tabs').querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  document.querySelectorAll('.ptab-content').forEach(c=>c.classList.remove('active'));
-  document.getElementById(contentId).classList.add('active');
-}
-
-// ═══════════════════════════════════════════════════════════
-// RENDER PACIENTES
-// ═══════════════════════════════════════════════════════════
-function renderPacientes(){
-  const tbody=document.getElementById('tbody-pacientes');
-  tbody.innerHTML='';
-  DB.pacientes.forEach(p=>{
-    const tratCount=DB.tratamientos.filter(t=>t.pacienteId===p.id).length;
-    const facCount=DB.facturas.filter(f=>f.pacienteId===p.id).length;
-    const xrayCount=DB.radiografias.filter(x=>x.pacienteId===p.id).length;
-    const lastVisit=DB.facturas.filter(f=>f.pacienteId===p.id).sort((a,b)=>b.fecha.localeCompare(a.fecha))[0];
-    tbody.innerHTML+=`<tr>
-      <td><span class="td-link" onclick="abrirPaciente(${p.id})">${p.nombre}</span></td>
-      <td>${p.dni}</td>
-      <td>${p.tel}</td>
-      <td>${lastVisit?formatDate(lastVisit.fecha):'—'}</td>
-      <td><span class="badge badge-blue">${tratCount} trat.</span></td>
-      <td><span class="badge ${facCount>0?'badge-green':'badge-gray'}">${facCount} fact.</span></td>
-      <td><span class="badge ${xrayCount>0?'badge-blue':'badge-gray'}">${xrayCount} rx</span></td>
-      <td>${badgeEstado(p.estado)}</td>
-      <td><div class="flex">
-        <button class="btn btn-sm btn-icon" title="Ver ficha" onclick="abrirPaciente(${p.id})"><i class="ti ti-eye"></i></button>
-        <button class="btn btn-sm btn-icon" title="Nueva cita"><i class="ti ti-calendar-plus"></i></button>
-        ${currentRole==='admin'?`<button class="btn btn-sm btn-icon" title="Eliminar" onclick="eliminarPaciente(${p.id})" style="color:var(--red)"><i class="ti ti-trash"></i></button>`:''}
-      </div></td>
-    </tr>`;
-  });
-  document.getElementById('kpi-pacientes').textContent=DB.pacientes.length;
-}
-
-// ═══════════════════════════════════════════════════════════
-// RENDER TRATAMIENTOS
-// ═══════════════════════════════════════════════════════════
-function renderTratamientos(){
-  const tbody=document.getElementById('tbody-tratamientos');
-  tbody.innerHTML='';
-  DB.tratamientos.forEach(t=>{
-    const p=getPaciente(t.pacienteId);
-    const f=getFactura(t.facturaId);
-    tbody.innerHTML+=`<tr>
-      <td><span class="td-link" onclick="abrirPaciente(${t.pacienteId})">${p.nombre}</span></td>
-      <td>${t.tipo}</td>
-      <td>${t.doctor}</td>
-      <td>${formatDate(t.inicio)}</td>
-      <td>${t.sesionesHechas}/${t.sesiones}</td>
-      <td><strong>${t.coste.toLocaleString('es-ES')}€</strong></td>
-      <td>${f?`<span class="td-link" onclick="showPage('facturas',document.getElementById('sb-facturas'))">${f.num}</span>`:'<span class="badge badge-gray">Sin factura</span>'}</td>
-      <td>${badgeEstado(t.estado)}</td>
-      <td><div class="flex">
-        <button class="btn btn-sm btn-icon" title="Ver paciente" onclick="abrirPaciente(${t.pacienteId})"><i class="ti ti-user"></i></button>
-        ${currentRole==='admin'?`<button class="btn btn-sm btn-icon" title="Eliminar" onclick="eliminarTratamiento(${t.id})" style="color:var(--red)"><i class="ti ti-trash"></i></button>`:''}
-      </div></td>
-    </tr>`;
-  });
-}
-
-// ═══════════════════════════════════════════════════════════
-// RENDER FACTURAS
-// ═══════════════════════════════════════════════════════════
-function renderFacturas(){
-  const tbody=document.getElementById('tbody-facturas');
-  tbody.innerHTML='';
-  DB.facturas.forEach(f=>{
-    const p=getPaciente(f.pacienteId);
-    const t=getTratamiento(f.tratamientoId);
-    tbody.innerHTML+=`<tr>
-      <td><strong>${f.num}</strong></td>
-      <td><span class="td-link" onclick="abrirPaciente(${f.pacienteId})">${p.nombre}</span></td>
-      <td>${t?t.tipo:f.concepto||'—'}</td>
-      <td>${formatDate(f.fecha)}</td>
-      <td><strong>${f.importe.toLocaleString('es-ES')}€</strong></td>
-      <td>${badgeEstado(f.estado)}</td>
-      <td><div class="flex">
-        ${f.estado==='Pendiente'?`<button class="btn btn-sm" onclick="marcarPagada(${f.id})" title="Marcar como pagada"><i class="ti ti-check"></i> Cobrada</button>`:''}
-        ${f.estado==='Pagada'?`<button class="btn btn-sm" style="color:var(--t3)" onclick="marcarPendiente(${f.id})"><i class="ti ti-rotate-clockwise-2"></i> Reabrir</button>`:''}
-        <button class="btn btn-sm btn-icon"><i class="ti ti-printer"></i></button>
-        ${currentRole==='admin'?`<button class="btn btn-sm btn-icon" onclick="eliminarFactura(${f.id})" style="color:var(--red)"><i class="ti ti-trash"></i></button>`:''}
-      </div></td>
-    </tr>`;
-  });
-  updateKPIs();
-  updateBadgePendiente();
-}
-
-// ═══════════════════════════════════════════════════════════
-// RENDER RADIOGRAFÍAS
-// ═══════════════════════════════════════════════════════════
-function renderRadiografias(){
-  // Llenar filtro pacientes
-  const sel=document.getElementById('filtro-xray-paciente');
-  sel.innerHTML='<option value="">Todos los pacientes</option>';
-  DB.pacientes.forEach(p=>{ sel.innerHTML+=`<option value="${p.id}">${p.nombre}</option>`; });
-  renderXrayGrid();
-}
-
-function renderXrayGrid(filtroNombre='', filtroPacienteId='', filtroTipo=''){
-  const container=document.getElementById('xray-grid-container');
-  let xrays=DB.radiografias;
-  if(filtroPacienteId) xrays=xrays.filter(x=>x.pacienteId==filtroPacienteId);
-  if(filtroTipo) xrays=xrays.filter(x=>x.tipo===filtroTipo);
-  if(filtroNombre) xrays=xrays.filter(x=>{
-    const p=getPaciente(x.pacienteId);
-    return p.nombre.toLowerCase().includes(filtroNombre.toLowerCase())||x.tipo.toLowerCase().includes(filtroNombre.toLowerCase());
-  });
-  if(xrays.length===0){
-    container.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><i class="ti ti-scan"></i><p>No se encontraron radiografías</p></div>`;
-    return;
+async function syncCitasWeb(){
+  const btn=document.getElementById('btn-sync');
+  btn.innerHTML='<i class="ti ti-loader-2 ti-spin"></i> Sincronizando...';
+  btn.disabled=true;
+  try{
+    const res=await fetch(API_CITAS,{signal:AbortSignal.timeout(8000)});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const citasWeb=Array.isArray(data)?data:(data.citas||[]);
+    let nuevas=0;
+    citasWeb.forEach(cw=>{
+      // Buscar si ya existe por id de la web (guardado en webId)
+      const existe=DB.citas.find(c=>c.webId===cw.id||c.webId===String(cw.id));
+      if(existe){
+        // Actualizar estado si cambió
+        if(cw.estado&&cw.estado!==existe.estado){existe.estado=cw.estado==='confirmada'?'Confirmada':'Pendiente';}
+      }else{
+        // Buscar paciente existente por nombre o teléfono
+        const nomWeb=(cw.nombre||cw.name||'').trim();
+        const telWeb=(cw.telefono||cw.tel||cw.phone||'').replace(/\s/g,'');
+        let pac=DB.pacientes.find(p=>p.tel.replace(/\s/g,'')===telWeb&&telWeb)||
+                DB.pacientes.find(p=>p.nombre.toLowerCase()===nomWeb.toLowerCase()&&nomWeb);
+        // Si no existe el paciente, crearlo como "Alta reciente"
+        if(!pac&&nomWeb){
+          pac={id:DB.nPac++,nombre:nomWeb,dni:'—',tel:telWeb||'—',email:cw.email||'—',zona:'—',dir:'—',fnac:'—',alg:'Ninguna',med:'Ninguna',obs:'Captado desde web',estado:'Alta reciente',ca:today()};
+          DB.pacientes.push(pac);
+          poblarSels();
+        }
+        if(pac){
+          DB.citas.push({
+            id:DB.nCita++,
+            webId:cw.id||String(Date.now()),
+            pacienteId:pac.id,
+            fecha:cw.fecha||(cw.fecha_preferida)||today(),
+            hora:cw.hora||cw.hora_preferida||'—',
+            doctor:cw.doctor||'Dra. Eider Landa',
+            motivo:cw.tratamiento||cw.motivo||cw.servicio||'Consulta web',
+            dur:'45 min',
+            estado:cw.estado==='confirmada'?'Confirmada':'Pendiente',
+            notas:(cw.mensaje||cw.notas||'')+(cw.email?` | email: ${cw.email}`:''),
+            origen:'Web'
+          });
+          nuevas++;
+        }
+      }
+    });
+    lastSync=new Date().toLocaleTimeString('es-ES');
+    document.getElementById('sync-status').textContent=`Último sync: ${lastSync} · ${nuevas} nueva${nuevas!==1?'s':''} de ${citasWeb.length} total`;
+    updKPIs();rAgenda();
+    if(nuevas>0){toast(`${nuevas} cita${nuevas>1?'s':''} nueva${nuevas>1?'s':''} desde la web`,'i');addAct('ti-world','#ede9fe','#7c3aed','Citas web sincronizadas',`${nuevas} nueva${nuevas>1?'s':''}`);}
+    else toast('Sin citas nuevas · todo al día','s');
+  }catch(err){
+    // API no disponible — mostrar aviso suave sin romper la app
+    const msg=err.message.includes('timeout')||err.message.includes('fetch')?'API web sin respuesta (normal en demo)':err.message;
+    document.getElementById('sync-status').textContent=`Sync: ${msg}`;
+    toast('API web no accesible en este momento','i');
   }
-  container.innerHTML='';
-  xrays.forEach(x=>{
-    const p=getPaciente(x.pacienteId);
-    container.innerHTML+=`<div class="xray-card" onclick="abrirVisor(${x.id})">
-      <div class="xray-thumb">
-        <i class="ti ti-scan"></i>
-        <div class="xray-overlay"><i class="ti ti-eye"></i></div>
-        ${x.archivo?`<div style="position:absolute;top:6px;right:6px"><span class="badge badge-green" style="font-size:9px;padding:2px 6px"><i class="ti ti-photo"></i> IMAGEN</span></div>`:''}
+  btn.innerHTML='<i class="ti ti-refresh"></i> Sync web';btn.disabled=false;
+}
+
+// ── AGENDA ──
+function rAgenda(){
+  const tb=document.getElementById('tbody-agenda');tb.innerHTML='';
+  if(!DB.citas.length){tb.innerHTML='<tr><td colspan="9"><div class="empty"><i class="ti ti-calendar-off"></i><p>Sin citas</p></div></td></tr>';return;}
+  DB.citas.slice().sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.hora.localeCompare(b.hora)).forEach(c=>{
+    const p=gPac(c.pacienteId);
+    const webPill=c.origen==='Web'?'<span class="web-badge"><i class="ti ti-world" style="font-size:9px"></i> WEB</span>':'';
+    tb.innerHTML+=`<tr>
+      <td>${fd(c.fecha)}</td><td><strong>${c.hora}</strong></td>
+      <td><span class="tl" onclick="abrirFicha(${c.pacienteId})">${p.nombre}</span>${webPill}</td>
+      <td>${c.motivo||'—'}</td><td>${c.doctor}</td><td>${c.dur}</td>
+      <td>${bdg(c.origen||'CRM')}</td>
+      <td>${bdg(c.estado)}</td>
+      <td><div class="flex">
+        ${c.estado==='Pendiente'?`<button class="btn bsm bsu" onclick="cEstCita(${c.id},'Confirmada')" title="Confirmar"><i class="ti ti-check"></i></button>`:''}
+        ${c.estado==='Confirmada'?`<button class="btn bsm" onclick="cEstCita(${c.id},'Completada')" title="Completar"><i class="ti ti-circle-check"></i></button>`:''}
+        ${c.estado!=='Cancelada'&&c.estado!=='Completada'?`<button class="btn bsm" onclick="cEstCita(${c.id},'Cancelada')" title="Cancelar"><i class="ti ti-ban"></i></button>`:''}
+        <button class="btn bsm bic" onclick="editarCita(${c.id})" title="Editar"><i class="ti ti-edit"></i></button>
+        <button class="btn bsm bic bd2" onclick="elimCita(${c.id})" title="Eliminar"><i class="ti ti-trash"></i></button>
+      </div></td>
+    </tr>`;
+  });
+  // Hoy dashboard
+  const hoy=today();const tb2=document.getElementById('tbody-hoy');
+  if(tb2){tb2.innerHTML='';DB.citas.filter(c=>c.fecha===hoy).forEach(c=>{const p=gPac(c.pacienteId);const wb=c.origen==='Web'?'<span class="web-badge" style="font-size:9px"><i class="ti ti-world" style="font-size:8px"></i>WEB</span>':'';tb2.innerHTML+=`<tr><td>${c.hora}</td><td><span class="tl" onclick="abrirFicha(${c.pacienteId})">${p.nombre}</span></td><td>${c.motivo||'—'}</td><td>${c.doctor}</td><td>${wb}</td><td>${bdg(c.estado)}</td></tr>`;});}
+}
+
+function cEstCita(id,est){
+  const c=DB.citas.find(c=>c.id===id);if(!c)return;
+  c.estado=est;rAgenda();updBadges();
+  toast(`Cita ${est.toLowerCase()}`,'s');
+  addAct('ti-calendar','var(--acc-soft)','var(--acc)',`Cita ${est}`,gPac(c.pacienteId).nombre);
+}
+
+function editarCita(id){
+  const c=DB.citas.find(c=>c.id===id);if(!c)return;
+  document.getElementById('ecp').value=c.pacienteId;
+  document.getElementById('ecf').value=c.fecha;
+  document.getElementById('ech').value=c.hora;
+  document.getElementById('ecdo').value=c.doctor;
+  document.getElementById('ecdu').value=c.dur;
+  document.getElementById('ecm').value=c.motivo||'';
+  document.getElementById('eces').value=c.estado;
+  document.getElementById('ecn').value=c.notas||'';
+  document.getElementById('mecita').dataset.eid=id;
+  openModal('mecita');
+}
+
+function guardarEditCita(){
+  const id=parseInt(document.getElementById('mecita').dataset.eid);
+  const c=DB.citas.find(c=>c.id===id);if(!c)return;
+  c.pacienteId=parseInt(document.getElementById('ecp').value)||c.pacienteId;
+  c.fecha=document.getElementById('ecf').value||c.fecha;
+  c.hora=document.getElementById('ech').value||c.hora;
+  c.doctor=document.getElementById('ecdo').value;
+  c.dur=document.getElementById('ecdu').value;
+  c.motivo=document.getElementById('ecm').value;
+  c.estado=document.getElementById('eces').value;
+  c.notas=document.getElementById('ecn').value;
+  closeModal('mecita');rAgenda();updBadges();toast('Cita actualizada','s');
+}
+
+function elimCita(id){
+  const c=DB.citas.find(c=>c.id===id);if(!c)return;
+  confirmar('Eliminar cita',`¿Eliminar la cita de ${gPac(c.pacienteId).nombre} el ${fd(c.fecha)} a las ${c.hora}?`,()=>{
+    DB.citas=DB.citas.filter(c=>c.id!==id);rAgenda();updKPIs();toast('Cita eliminada','s');
+  });
+}
+
+function guardarCita(){
+  const pid=parseInt(document.getElementById('cp').value);if(!pid){toast('Selecciona un paciente','e');return;}
+  DB.citas.push({id:DB.nCita++,pacienteId:pid,fecha:document.getElementById('cf').value||today(),hora:document.getElementById('ch').value||'09:00',doctor:document.getElementById('cdo').value,motivo:document.getElementById('cm').value,dur:document.getElementById('cdu').value,estado:'Pendiente',notas:document.getElementById('cn').value,origen:'CRM'});
+  closeModal('mcita');rAgenda();updBadges();
+  toast('Cita guardada','s');addAct('ti-calendar-plus','var(--acc-soft)','var(--acc)','Nueva cita',gPac(pid).nombre);
+}
+
+// ── PACIENTES ──
+function rPac(){
+  const tb=document.getElementById('tbody-pac');tb.innerHTML='';
+  if(!DB.pacientes.length){tb.innerHTML='<tr><td colspan="8"><div class="empty"><i class="ti ti-user-off"></i><p>Sin pacientes</p></div></td></tr>';return;}
+  DB.pacientes.forEach(p=>{
+    const nT=DB.tratamientos.filter(t=>t.pacienteId===p.id).length;
+    const nF=DB.facturas.filter(f=>f.pacienteId===p.id).length;
+    const nX=DB.radiografias.filter(x=>x.pacienteId===p.id).length;
+    tb.innerHTML+=`<tr>
+      <td><span class="tl" onclick="abrirFicha(${p.id})">${p.nombre}</span></td>
+      <td>${p.dni}</td><td>${p.tel}</td>
+      <td><span class="badge bb2">${nT}</span></td>
+      <td><span class="badge ${nF>0?'bg2':'bgr2'}">${nF}</span></td>
+      <td><span class="badge ${nX>0?'bb2':'bgr2'}">${nX}</span></td>
+      <td>${bdg(p.estado)}</td>
+      <td><div class="flex">
+        <button class="btn bsm bic" onclick="abrirFicha(${p.id})"><i class="ti ti-eye"></i></button>
+        ${CU?.role==='admin'?`<button class="btn bsm bic bd2" onclick="elimPac(${p.id})"><i class="ti ti-trash"></i></button>`:''}
+      </div></td>
+    </tr>`;
+  });
+}
+
+function elimPac(id){
+  confirmar('Eliminar paciente',`¿Eliminar a ${gPac(id).nombre} y todos sus registros?`,()=>{
+    DB.pacientes=DB.pacientes.filter(p=>p.id!==id);
+    DB.tratamientos=DB.tratamientos.filter(t=>t.pacienteId!==id);
+    DB.facturas=DB.facturas.filter(f=>f.pacienteId!==id);
+    DB.radiografias=DB.radiografias.filter(x=>x.pacienteId!==id);
+    DB.citas=DB.citas.filter(c=>c.pacienteId!==id);
+    rPac();updKPIs();poblarSels();toast('Paciente eliminado','s');
+  });
+}
+
+function guardarPac(){
+  const n=document.getElementById('pn').value.trim();if(!n){toast('Nombre obligatorio','e');return;}
+  const p={id:DB.nPac++,nombre:n,dni:document.getElementById('pd').value||'—',tel:document.getElementById('pt').value||'—',email:document.getElementById('pe').value||'—',zona:document.getElementById('pz').value||'Bilbao',dir:document.getElementById('pdi').value||'—',fnac:document.getElementById('pf').value||'—',alg:document.getElementById('pa').value||'Ninguna',med:document.getElementById('pm').value||'Ninguna',obs:document.getElementById('po').value||'',estado:'Alta reciente',ca:today()};
+  DB.pacientes.push(p);poblarSels();closeModal('mpac');rPac();updKPIs();
+  toast('Paciente '+n+' registrado','s');addAct('ti-user-plus','var(--acc-soft)','var(--acc)','Nuevo paciente',n);
+}
+
+// ── TRATAMIENTOS ──
+function rTrat(){
+  const tb=document.getElementById('tbody-trat');tb.innerHTML='';
+  if(!DB.tratamientos.length){tb.innerHTML='<tr><td colspan="9"><div class="empty"><i class="ti ti-tooth"></i><p>Sin tratamientos</p></div></td></tr>';return;}
+  DB.tratamientos.forEach(t=>{
+    const p=gPac(t.pacienteId);const f=gFac(t.facId);
+    tb.innerHTML+=`<tr>
+      <td><span class="tl" onclick="abrirFicha(${t.pacienteId})">${p.nombre}</span></td>
+      <td>${t.tipo}</td><td>${t.doctor}</td><td>${fd(t.inicio)}</td>
+      <td>${t.sesH}/${t.ses}</td><td><strong>${t.coste.toLocaleString('es-ES')}€</strong></td>
+      <td>${f?`<span class="tl" onclick="showPage('facturas',document.querySelectorAll('.sbi')[5])">${f.num}</span>`:'<span class="badge bgr2">—</span>'}</td>
+      <td>${bdg(t.estado)}</td>
+      <td>${CU?.role==='admin'?`<button class="btn bsm bic bd2" onclick="elimTrat(${t.id})"><i class="ti ti-trash"></i></button>`:''}</td>
+    </tr>`;
+  });
+}
+
+function elimTrat(id){
+  const t=DB.tratamientos.find(t=>t.id===id);if(!t)return;
+  confirmar('Eliminar tratamiento',`¿Eliminar "${t.tipo}" de ${gPac(t.pacienteId).nombre}?`,()=>{
+    DB.tratamientos=DB.tratamientos.filter(t=>t.id!==id);rTrat();toast('Tratamiento eliminado','s');
+  });
+}
+
+function guardarTrat(){
+  const pid=parseInt(document.getElementById('tp').value);const coste=parseFloat(document.getElementById('tc2').value)||0;
+  if(!pid){toast('Selecciona un paciente','e');return;}
+  const tipo=document.getElementById('tt').value;let facId=null;
+  if(document.getElementById('tfa').value==='si'&&coste>0){
+    const fn=`BT-2026-${String(DB.nFac).padStart(3,'0')}`;
+    DB.facturas.push({id:DB.nFac++,num:fn,pacienteId:pid,tratId:DB.nTrat,fecha:today(),imp:coste,concepto:tipo,estado:'Pendiente'});
+    facId=DB.nFac-1;updKPIs();poblarSels();
+  }
+  DB.tratamientos.push({id:DB.nTrat++,pacienteId:pid,tipo,doctor:document.getElementById('td').value,inicio:document.getElementById('ti2').value||today(),ses:parseInt(document.getElementById('ts').value)||1,sesH:0,coste,estado:'En curso',facId,notas:document.getElementById('tn').value||''});
+  const p=gPac(pid);if(p.estado==='Activo'||p.estado==='Alta reciente')p.estado='En tratamiento';
+  closeModal('mtrat');rTrat();rPac();updKPIs();poblarSels();
+  toast('Tratamiento registrado'+(facId?' + factura':''),'s');
+  addAct('ti-tooth','var(--ys)','var(--yellow)','Nuevo tratamiento',tipo+' · '+gPac(pid).nombre);
+}
+
+// ── FACTURAS ──
+function rFac(){
+  const tb=document.getElementById('tbody-fac');tb.innerHTML='';
+  if(!DB.facturas.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><i class="ti ti-receipt-off"></i><p>Sin facturas</p></div></td></tr>';return;}
+  DB.facturas.forEach(f=>{
+    const p=gPac(f.pacienteId);
+    tb.innerHTML+=`<tr>
+      <td><strong>${f.num}</strong></td>
+      <td><span class="tl" onclick="abrirFicha(${f.pacienteId})">${p.nombre}</span></td>
+      <td>${f.concepto}</td><td>${fd(f.fecha)}</td>
+      <td><strong>${f.imp.toLocaleString('es-ES')}€</strong></td>
+      <td>${bdg(f.estado)}</td>
+      <td><div class="flex">
+        ${f.estado!=='Pagada'?`<button class="btn bsm bsu" onclick="mPag(${f.id})"><i class="ti ti-check"></i> Cobrada</button>`:''}
+        ${f.estado==='Pagada'?`<button class="btn bsm" onclick="mPen(${f.id})"><i class="ti ti-rotate-clockwise-2"></i></button>`:''}
+        <button class="btn bsm bic"><i class="ti ti-printer"></i></button>
+        ${CU?.role==='admin'?`<button class="btn bsm bic bd2" onclick="elimFac(${f.id})"><i class="ti ti-trash"></i></button>`:''}
+      </div></td>
+    </tr>`;
+  });
+  updKPIs();
+}
+
+function mPag(id){const f=DB.facturas.find(f=>f.id===id);if(!f)return;f.estado='Pagada';rFac();updKPIs();toast('Factura '+f.num+' cobrada','s');addAct('ti-receipt','var(--gs)','var(--green)','Factura cobrada',f.num+' · '+f.imp+'€');}
+function mPen(id){const f=DB.facturas.find(f=>f.id===id);if(!f)return;f.estado='Pendiente';rFac();updKPIs();toast('Factura reabierta','i');}
+function elimFac(id){
+  const f=DB.facturas.find(f=>f.id===id);if(!f)return;
+  confirmar('Eliminar factura',`¿Eliminar ${f.num} (${f.imp}€)?`,()=>{DB.facturas=DB.facturas.filter(f=>f.id!==id);rFac();updKPIs();poblarSels();toast('Factura eliminada','s');});
+}
+function guardarFac(){
+  const pid=parseInt(document.getElementById('fp').value);const imp=parseFloat(document.getElementById('fi').value);
+  if(!pid||isNaN(imp)||imp<=0){toast('Completa los campos','e');return;}
+  const fn=`BT-2026-${String(DB.nFac).padStart(3,'0')}`;
+  DB.facturas.push({id:DB.nFac++,num:fn,pacienteId:pid,tratId:parseInt(document.getElementById('ft2').value)||null,fecha:document.getElementById('ff2').value||today(),imp,concepto:document.getElementById('fc').value||'Servicios dentales',estado:document.getElementById('fe').value});
+  closeModal('mfac');rFac();updKPIs();poblarSels();
+  toast('Factura '+fn+' creada','s');addAct('ti-receipt','var(--gs)','var(--green)','Nueva factura',fn+' · '+imp+'€');
+}
+
+// ── RADIOGRAFÍAS ──
+function rxRender(q='',pid='',tip=''){
+  const c=document.getElementById('rxgrid');
+  let xr=DB.radiografias;
+  if(pid)xr=xr.filter(x=>x.pacienteId==pid);
+  if(tip)xr=xr.filter(x=>x.tipo===tip);
+  if(q)xr=xr.filter(x=>{const p=gPac(x.pacienteId);return p.nombre.toLowerCase().includes(q)||x.tipo.toLowerCase().includes(q);});
+  if(!xr.length){c.innerHTML='<div class="empty" style="grid-column:1/-1"><i class="ti ti-scan"></i><p>Sin radiografías</p></div>';return;}
+  c.innerHTML='';
+  xr.forEach(x=>{
+    const p=gPac(x.pacienteId);
+    c.innerHTML+=`<div class="xcard">
+      <div class="xt">${x.archivo?`<img src="${x.archivo}">`:'<i class="ti ti-scan"></i>'}
+        <div class="xov">
+          <button class="xovb" onclick="abrirVisor(${x.id})"><i class="ti ti-eye" style="font-size:13px"></i></button>
+          <button class="xovb" onclick="elimRx(${x.id})" style="color:var(--red)"><i class="ti ti-trash" style="font-size:13px"></i></button>
+        </div>
       </div>
-      <div class="xray-info">
-        <h4>${x.tipo}</h4>
-        <p>${p.nombre}</p>
-        <p style="color:var(--t3);font-size:10px;margin-top:2px">${formatDate(x.fecha)} · ${x.doctor.split(' ')[1]}</p>
-      </div>
+      <div class="xi"><h4>${x.tipo}</h4><p>${p.nombre}</p><p style="color:var(--t3);font-size:10px;margin-top:2px">${fd(x.fecha)}</p></div>
     </div>`;
   });
 }
 
-function filterXrays(el){
-  const nombre=document.querySelector('#page-radiografias .search-bar input').value;
-  const pacId=document.getElementById('filtro-xray-paciente').value;
-  const tipo=document.getElementById('filtro-xray-tipo').value;
-  renderXrayGrid(nombre,pacId,tipo);
+function rxFilter(q){
+  if(q===undefined)q=document.querySelector('#page-radiografias .sb input').value;
+  rxRender(q.toLowerCase(),document.getElementById('rx-fp').value,document.getElementById('rx-ft').value);
 }
 
-// ═══════════════════════════════════════════════════════════
-// RENDER CONTABILIDAD
-// ═══════════════════════════════════════════════════════════
-function renderContabilidad(){
-  const facturas=DB.facturas;
-  const total=facturas.reduce((s,f)=>s+f.importe,0);
-  const pagadas=facturas.filter(f=>f.estado==='Pagada').reduce((s,f)=>s+f.importe,0);
-  const pendientes=facturas.filter(f=>f.estado==='Pendiente').reduce((s,f)=>s+f.importe,0);
-  const vencidas=facturas.filter(f=>f.estado==='Vencida').reduce((s,f)=>s+f.importe,0);
-  const cobPct=total>0?Math.round(pagadas/total*100):0;
-
-  document.getElementById('contab-summary').innerHTML=`
-    <div class="contab-card"><div class="val">${total.toLocaleString('es-ES')}€</div><div class="lbl">Total facturado</div></div>
-    <div class="contab-card"><div class="val" style="color:var(--green)">${pagadas.toLocaleString('es-ES')}€</div><div class="lbl">Cobrado</div><div class="progress-bar"><div class="progress-fill" style="width:${cobPct}%;background:var(--green)"></div></div></div>
-    <div class="contab-card"><div class="val" style="color:var(--yellow)">${pendientes.toLocaleString('es-ES')}€</div><div class="lbl">Pendiente</div></div>
-    <div class="contab-card"><div class="val" style="color:var(--red)">${vencidas.toLocaleString('es-ES')}€</div><div class="lbl">Vencido</div></div>
-    <div class="contab-card"><div class="val">${cobPct}%</div><div class="lbl">Tasa cobro</div></div>
-  `;
-
-  // Por estado
-  const estados=['Pagada','Pendiente','Vencida'];
-  const tbody=document.getElementById('tbody-contab-estado');
-  tbody.innerHTML='';
-  estados.forEach(est=>{
-    const grupo=facturas.filter(f=>f.estado===est);
-    const sum=grupo.reduce((s,f)=>s+f.importe,0);
-    const pct=total>0?Math.round(sum/total*100):0;
-    if(grupo.length===0)return;
-    tbody.innerHTML+=`<tr>
-      <td>${badgeEstado(est)}</td>
-      <td>${grupo.length} facturas</td>
-      <td><strong>${sum.toLocaleString('es-ES')}€</strong></td>
-      <td><div class="flex gap-2"><div class="progress-bar" style="width:80px;display:inline-block"><div class="progress-fill" style="width:${pct}%;background:${est==='Pagada'?'var(--green)':est==='Vencida'?'var(--red)':'var(--yellow)'}"></div></div> ${pct}%</div></td>
-      <td><button class="btn btn-sm" onclick="showPage('facturas',document.getElementById('sb-facturas'))"><i class="ti ti-arrow-right"></i> Ver</button></td>
-    </tr>`;
+function elimRx(id){
+  const x=DB.radiografias.find(x=>x.id===id);if(!x)return;
+  confirmar('Eliminar radiografía',`¿Eliminar "${x.tipo}" de ${gPac(x.pacienteId).nombre}?`,()=>{
+    DB.radiografias=DB.radiografias.filter(x=>x.id!==id);
+    rxFilter('');toast('Radiografía eliminada','s');
   });
-
-  // Por paciente
-  const tbodyP=document.getElementById('tbody-contab-paciente');
-  tbodyP.innerHTML='';
-  DB.pacientes.forEach(p=>{
-    const facs=facturas.filter(f=>f.pacienteId===p.id);
-    if(facs.length===0)return;
-    const tot=facs.reduce((s,f)=>s+f.importe,0);
-    const cob=facs.filter(f=>f.estado==='Pagada').reduce((s,f)=>s+f.importe,0);
-    tbodyP.innerHTML+=`<tr>
-      <td class="td-link" onclick="abrirPaciente(${p.id})">${p.nombre}</td>
-      <td>${facs.length}</td>
-      <td>${tot.toLocaleString('es-ES')}€</td>
-      <td style="color:var(--green)">${cob.toLocaleString('es-ES')}€</td>
-      <td style="color:var(--yellow)">${(tot-cob).toLocaleString('es-ES')}€</td>
-    </tr>`;
-  });
-
-  // Mes
-  const mFac=facturas.length;
-  const mCob=pagadas.toLocaleString('es-ES')+'€';
-  const mPend=pendientes.toLocaleString('es-ES')+'€';
-  document.getElementById('cont-mes-facturas').innerHTML=`<strong>${mFac}</strong>`;
-  document.getElementById('cont-mes-cobrado').innerHTML=`<strong>${mCob}</strong>`;
-  document.getElementById('cont-mes-pendiente').innerHTML=`<strong>${mPend}</strong>`;
 }
 
-// ═══════════════════════════════════════════════════════════
-// KPIs DASHBOARD
-// ═══════════════════════════════════════════════════════════
-function updateKPIs(){
-  const total=DB.facturas.reduce((s,f)=>s+f.importe,0);
-  const pagadas=DB.facturas.filter(f=>f.estado==='Pagada').reduce((s,f)=>s+f.importe,0);
-  const pendientes=DB.facturas.filter(f=>f.estado==='Pendiente'||f.estado==='Vencida').reduce((s,f)=>s+f.importe,0);
-  const nPend=DB.facturas.filter(f=>f.estado==='Pendiente'||f.estado==='Vencida').length;
-  document.getElementById('kpi-facturado').textContent=total.toLocaleString('es-ES')+'€';
-  document.getElementById('kpi-cobrado-sub').textContent='Cobrado: '+pagadas.toLocaleString('es-ES')+'€';
-  document.getElementById('kpi-pendiente').textContent=pendientes.toLocaleString('es-ES')+'€';
-  document.getElementById('kpi-pendiente-sub').textContent=nPend+' facturas sin cobrar';
+function guardarRx(){
+  const pid=parseInt(document.getElementById('xp').value);if(!pid){toast('Selecciona un paciente','e');return;}
+  const file=document.getElementById('xfile').files[0];
+  const save=(url)=>{
+    DB.radiografias.push({id:DB.nRx++,pacienteId:pid,tipo:document.getElementById('xt').value,fecha:document.getElementById('xf').value||today(),doctor:document.getElementById('xd').value,notas:document.getElementById('xn').value||'',archivo:url||null});
+    closeModal('mrx');document.getElementById('ufl').innerHTML='';document.getElementById('xfile').value='';
+    if(document.getElementById('page-radiografias').classList.contains('active'))rxRender();
+    toast('Radiografía guardada','s');addAct('ti-scan','var(--bs)','var(--blue)','Radiografía subida',gPac(pid).nombre+' · '+document.getElementById('xt').value);
+  };
+  if(file){const r=new FileReader();r.onload=e=>save(e.target.result);r.readAsDataURL(file);}else save(null);
 }
 
-// ═══════════════════════════════════════════════════════════
-// FICHA DE PACIENTE
-// ═══════════════════════════════════════════════════════════
-function abrirPaciente(id){
-  const p=getPaciente(id);
-  if(!p.id)return;
-  const initials=p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
-  document.getElementById('ficha-titulo').textContent='Ficha: '+p.nombre;
-  document.getElementById('ficha-info').innerHTML=`
-    <div class="patient-avatar">${initials}</div>
-    <div class="patient-details">
-      <h4>${p.nombre}</h4>
-      <p><i class="ti ti-id-badge" style="font-size:12px;margin-right:3px"></i>${p.dni} · <i class="ti ti-phone" style="font-size:12px;margin-right:3px"></i>${p.tel}</p>
-      <p><i class="ti ti-mail" style="font-size:12px;margin-right:3px"></i>${p.email}</p>
-      <p><i class="ti ti-map-pin" style="font-size:12px;margin-right:3px"></i>${p.dir}</p>
-      ${p.alergias&&p.alergias!=='Ninguna'?`<p style="color:var(--red);margin-top:4px"><i class="ti ti-alert-triangle" style="font-size:12px"></i> Alergia: <strong>${p.alergias}</strong></p>`:''}
-      <div style="margin-top:6px">${badgeEstado(p.estado)}</div>
-    </div>
-  `;
-  // Tratamientos del paciente
-  const trats=DB.tratamientos.filter(t=>t.pacienteId===id);
-  const tbodyT=document.getElementById('ficha-tbody-tratamientos');
-  tbodyT.innerHTML='';
-  if(trats.length===0) tbodyT.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:1.5rem">Sin tratamientos registrados</td></tr>';
-  else trats.forEach(t=>{ tbodyT.innerHTML+=`<tr><td>${t.tipo}</td><td>${t.doctor}</td><td>${formatDate(t.inicio)}</td><td>${t.sesionesHechas}/${t.sesiones}</td><td>${t.coste.toLocaleString('es-ES')}€</td><td>${badgeEstado(t.estado)}</td></tr>`; });
-  // Facturas del paciente
-  const facs=DB.facturas.filter(f=>f.pacienteId===id);
-  const tbodyF=document.getElementById('ficha-tbody-facturas');
-  tbodyF.innerHTML='';
-  if(facs.length===0) tbodyF.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:1.5rem">Sin facturas registradas</td></tr>';
-  else facs.forEach(f=>{ tbodyF.innerHTML+=`<tr><td>${f.num}</td><td>${formatDate(f.fecha)}</td><td>${f.concepto}</td><td>${f.importe.toLocaleString('es-ES')}€</td><td>${badgeEstado(f.estado)}</td></tr>`; });
-  // Radiografías del paciente
-  const xrays=DB.radiografias.filter(x=>x.pacienteId===id);
-  const grid=document.getElementById('ficha-xray-grid');
-  if(xrays.length===0) grid.innerHTML='<div style="color:var(--t3);font-size:13px;padding:1rem">Sin radiografías</div>';
-  else { grid.innerHTML=''; xrays.forEach(x=>{ grid.innerHTML+=`<div class="xray-card" onclick="abrirVisor(${x.id})"><div class="xray-thumb"><i class="ti ti-scan"></i><div class="xray-overlay"><i class="ti ti-eye"></i></div></div><div class="xray-info"><h4>${x.tipo}</h4><p style="font-size:11px;color:var(--t3)">${formatDate(x.fecha)}</p></div></div>`; }); }
-  // Historial
-  document.getElementById('ficha-historial').innerHTML=`
-    <p><strong>Alergias:</strong> ${p.alergias}</p>
-    <p><strong>Medicación:</strong> ${p.med}</p>
-    <p><strong>Observaciones:</strong> ${p.obs}</p>
-    <p><strong>Fecha de nacimiento:</strong> ${formatDate(p.fnac)}</p>
-    <hr style="margin:.8rem 0;border-color:var(--bd)">
-    <p><strong>${trats.length}</strong> tratamientos · <strong>${facs.length}</strong> facturas · <strong>${xrays.length}</strong> radiografías</p>
-  `;
-  // Reset tabs
-  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.ptab-content').forEach(c=>c.classList.remove('active'));
-  document.querySelector('.ptab').classList.add('active');
-  document.getElementById('ptab-tratamientos').classList.add('active');
-  openModal('modal-ficha-paciente');
-}
+function rxDrop(e){e.preventDefault();document.getElementById('uz').classList.remove('drag');const f=e.dataTransfer.files[0];if(f){document.getElementById('xfile').files=e.dataTransfer.files;rxFileUi(f);}}
+function rxFileSelect(e){const f=e.target.files[0];if(f)rxFileUi(f);}
+function rxFileUi(f){document.getElementById('ufl').innerHTML=`<div class="ufi"><i class="ti ti-photo"></i><span>${f.name} (${(f.size/1024).toFixed(0)}KB)</span><button onclick="document.getElementById('xfile').value='';this.parentNode.remove()"><i class="ti ti-x"></i></button></div>`;}
 
-// ═══════════════════════════════════════════════════════════
-// VISOR RADIOGRAFÍAS
-// ═══════════════════════════════════════════════════════════
 function abrirVisor(id){
-  const x=DB.radiografias.find(r=>r.id===id);
-  if(!x)return;
-  const p=getPaciente(x.pacienteId);
-  document.getElementById('viewer-info').innerHTML=`<h3>${x.tipo} · ${p.nombre}</h3><p>${formatDate(x.fecha)} · ${x.doctor}</p><p style="font-size:11px;margin-top:4px;opacity:.6">${x.notas}</p>`;
-  document.getElementById('viewer-label').textContent=`${x.tipo} — ${p.nombre}`;
-  const img=document.getElementById('viewer-img');
-  const ph=document.getElementById('viewer-placeholder');
-  if(x.archivo){
-    img.src=x.archivo; img.style.display='block'; ph.style.display='none';
-  } else {
-    img.style.display='none'; ph.style.display='flex';
-  }
-  document.getElementById('xray-viewer').classList.add('open');
+  const x=DB.radiografias.find(r=>r.id===id);if(!x)return;
+  const p=gPac(x.pacienteId);
+  document.getElementById('xvinfo').innerHTML=`<h3>${x.tipo} · ${p.nombre}</h3><p>${fd(x.fecha)} · ${x.doctor}</p><p style="font-size:11px;margin-top:4px;opacity:.5">${x.notas}</p>`;
+  document.getElementById('xvphl').textContent=x.tipo+' — '+p.nombre;
+  const img=document.getElementById('xvimg');const ph=document.getElementById('xvph');
+  if(x.archivo){img.src=x.archivo;img.style.display='block';ph.style.display='none';}
+  else{img.style.display='none';ph.style.display='flex';}
+  document.getElementById('vdl').onclick=x.archivo?()=>{const a=document.createElement('a');a.href=x.archivo;a.download=`rx-${p.nombre.split(' ')[0]}-${x.tipo}.jpg`;a.click();}:()=>toast('Sin imagen adjunta','i');
+  document.getElementById('xv').classList.add('open');
 }
-function closeViewer(){ document.getElementById('xray-viewer').classList.remove('open'); }
+function closeViewer(){document.getElementById('xv').classList.remove('open');}
 
-// ═══════════════════════════════════════════════════════════
-// GUARDAR DATOS
-// ═══════════════════════════════════════════════════════════
-function poblarSelects(){
-  const pacs=DB.pacientes;
-  ['cita-paciente','trat-paciente','fac-paciente','xray-paciente'].forEach(id=>{
-    const sel=document.getElementById(id);
-    if(!sel)return;
-    const curr=sel.value;
-    sel.innerHTML='<option value="">Seleccionar paciente...</option>';
-    pacs.forEach(p=>{ sel.innerHTML+=`<option value="${p.id}">${p.nombre}</option>`; });
-    if(curr)sel.value=curr;
-  });
-  const selFT=document.getElementById('fac-tratamiento');
-  if(selFT){
-    selFT.innerHTML='<option value="">Sin tratamiento específico</option>';
-    DB.tratamientos.forEach(t=>{ const p=getPaciente(t.pacienteId); selFT.innerHTML+=`<option value="${t.id}">${p.nombre} · ${t.tipo}</option>`; });
-  }
+// ── FICHA ──
+function abrirFicha(id){
+  const p=gPac(id);if(!p.id)return;
+  const ini=p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
+  document.getElementById('ficha-title').textContent='Ficha: '+p.nombre;
+  document.getElementById('ficha-card').innerHTML=`<div class="pav">${ini}</div><div class="pd"><h4>${p.nombre}</h4><p><i class="ti ti-id-badge" style="font-size:11px"></i> ${p.dni} &nbsp;·&nbsp; <i class="ti ti-phone" style="font-size:11px"></i> ${p.tel}</p><p><i class="ti ti-mail" style="font-size:11px"></i> ${p.email}</p><p><i class="ti ti-map-pin" style="font-size:11px"></i> ${p.zona} · ${p.dir}</p>${p.alg&&p.alg!=='Ninguna'?`<p style="color:var(--red);margin-top:4px"><i class="ti ti-alert-triangle" style="font-size:11px"></i> Alergia: <strong>${p.alg}</strong></p>`:''}<div style="margin-top:6px">${bdg(p.estado)}</div></div>`;
+  const tr=DB.tratamientos.filter(t=>t.pacienteId===id);
+  document.getElementById('ft-tr').innerHTML=tr.length?tr.map(t=>`<tr><td>${t.tipo}</td><td>${t.doctor}</td><td>${fd(t.inicio)}</td><td>${t.sesH}/${t.ses}</td><td>${t.coste.toLocaleString('es-ES')}€</td><td>${bdg(t.estado)}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:1.5rem">Sin tratamientos</td></tr>';
+  const fa=DB.facturas.filter(f=>f.pacienteId===id);
+  document.getElementById('ft-fa').innerHTML=fa.length?fa.map(f=>`<tr><td>${f.num}</td><td>${fd(f.fecha)}</td><td>${f.concepto}</td><td>${f.imp.toLocaleString('es-ES')}€</td><td>${bdg(f.estado)}</td><td>${f.estado!=='Pagada'?`<button class="btn bsm bsu" onclick="mPag(${f.id});abrirFicha(${id})"><i class="ti ti-check"></i></button>`:''}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:1.5rem">Sin facturas</td></tr>';
+  const rx=DB.radiografias.filter(x=>x.pacienteId===id);
+  document.getElementById('ft-rxg').innerHTML=rx.length?rx.map(x=>`<div class="xcard" onclick="abrirVisor(${x.id})"><div class="xt">${x.archivo?`<img src="${x.archivo}">`:'<i class="ti ti-scan"></i>'}<div class="xov"><button class="xovb"><i class="ti ti-eye" style="font-size:12px"></i></button></div></div><div class="xi"><h4>${x.tipo}</h4><p style="font-size:10px;color:var(--t3)">${fd(x.fecha)}</p></div></div>`).join(''):'<div style="color:var(--t3);font-size:13px;padding:.5rem">Sin radiografías</div>';
+  document.getElementById('ft-hi').innerHTML=`<p><strong>Fecha nac.:</strong> ${fd(p.fnac)}</p><p><strong>Alergias:</strong> ${p.alg}</p><p><strong>Medicación:</strong> ${p.med}</p><p><strong>Observaciones:</strong> ${p.obs||'—'}</p><hr style="margin:.8rem 0;border-color:var(--bd)"><p><strong>${tr.length}</strong> tratamientos · <strong>${fa.length}</strong> facturas · <strong>${rx.length}</strong> radiografías</p>`;
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.ptc').forEach(c=>c.classList.remove('active'));
+  document.querySelector('.ptab').classList.add('active');document.getElementById('pt-tr').classList.add('active');
+  openModal('mficha');
 }
 
-function guardarCita(){
-  const pac=document.getElementById('cita-paciente').value;
-  if(!pac){toast('Selecciona un paciente','error');return;}
-  toast('Cita guardada correctamente');
-  closeModal('modal-cita');
-  addActivity('ti-calendar','var(--acc-soft)','var(--acc)','Nueva cita creada',getPaciente(parseInt(pac)).nombre);
+// ── CONTABILIDAD ──
+function getMeses(){const r=[];const n=new Date();for(let i=5;i>=0;i--){const d=new Date(n.getFullYear(),n.getMonth()-i,1);r.push({l:d.toLocaleDateString('es-ES',{month:'short',year:'2-digit'}),m:d.getMonth(),y:d.getFullYear()});}return r;}
+
+function rContab(){
+  const tot=DB.facturas.reduce((s,f)=>s+f.imp,0);
+  const cob=DB.facturas.filter(f=>f.estado==='Pagada').reduce((s,f)=>s+f.imp,0);
+  const pen=tot-cob;const tick=DB.facturas.length?Math.round(tot/DB.facturas.length):0;const pct=tot?Math.round(cob/tot*100):0;
+  document.getElementById('ckpis').innerHTML=`
+    <div class="ck"><div class="val">${tot.toLocaleString('es-ES')}€</div><div class="lbl">Total facturado</div></div>
+    <div class="ck"><div class="val" style="color:var(--green)">${cob.toLocaleString('es-ES')}€</div><div class="lbl">Cobrado</div><div class="pb"><div class="pbf" style="width:${pct}%;background:var(--green)"></div></div></div>
+    <div class="ck"><div class="val" style="color:var(--yellow)">${pen.toLocaleString('es-ES')}€</div><div class="lbl">Pendiente</div></div>
+    <div class="ck"><div class="val">${tick.toLocaleString('es-ES')}€</div><div class="lbl">Ticket medio</div></div>
+    <div class="ck"><div class="val">${pct}%</div><div class="lbl">Tasa cobro</div></div>`;
+  rChEvo();rChStk();rEst();rCPac();
 }
 
-function guardarPaciente(){
-  const nombre=document.getElementById('pac-nombre').value.trim();
-  if(!nombre){toast('El nombre es obligatorio','error');return;}
-  const nuevo={
-    id:DB.nextPacId++, nombre,
-    dni:document.getElementById('pac-dni').value||'—',
-    tel:document.getElementById('pac-tel').value||'—',
-    email:document.getElementById('pac-email').value||'—',
-    dir:document.getElementById('pac-dir').value||'—',
-    fnac:document.getElementById('pac-fnac').value||'—',
-    alergias:document.getElementById('pac-alergias').value||'Ninguna',
-    med:document.getElementById('pac-med').value||'Ninguna',
-    obs:document.getElementById('pac-obs').value||'',
-    estado:'Alta reciente'
-  };
-  DB.pacientes.push(nuevo);
-  poblarSelects();
-  toast('Paciente '+nombre+' registrado');
-  closeModal('modal-paciente');
-  renderPacientes();
-  addActivity('ti-user-plus','var(--acc-soft)','var(--acc)','Nuevo paciente',nombre);
-  document.getElementById('kpi-pacientes').textContent=DB.pacientes.length;
+function rChEvo(){
+  const ms=getMeses();
+  const fac=ms.map(m=>DB.facturas.filter(f=>{const d=new Date(f.fecha);return d.getMonth()===m.m&&d.getFullYear()===m.y;}).reduce((s,f)=>s+f.imp,0));
+  const cob=ms.map(m=>DB.facturas.filter(f=>{const d=new Date(f.fecha);return d.getMonth()===m.m&&d.getFullYear()===m.y&&f.estado==='Pagada';}).reduce((s,f)=>s+f.imp,0));
+  const ctx=document.getElementById('ch-evo');if(!ctx)return;if(CH.evo)CH.evo.destroy();
+  CH.evo=new Chart(ctx,{type:'line',data:{labels:ms.map(m=>m.l),datasets:[{label:'Facturado',data:fac,borderColor:'#1a7fd4',backgroundColor:'rgba(26,127,212,.1)',tension:.35,fill:true},{label:'Cobrado',data:cob,borderColor:'#059669',backgroundColor:'rgba(5,150,105,.12)',tension:.35,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'€'}}}}});
 }
 
-function guardarTratamiento(){
-  const pacId=parseInt(document.getElementById('trat-paciente').value);
-  const tipo=document.getElementById('trat-tipo').value;
-  const coste=parseFloat(document.getElementById('trat-coste').value)||0;
-  if(!pacId){toast('Selecciona un paciente','error');return;}
-  const facAuto=document.getElementById('trat-factura-auto').value==='si';
-  let facturaId=null;
-  if(facAuto && coste>0){
-    const p=getPaciente(pacId);
-    const fNum=`BT-2026-${String(DB.nextFacturaId).padStart(3,'0')}`;
-    const nf={id:DB.nextFacturaId++, num:fNum, pacienteId:pacId, tratamientoId:DB.nextTratId, fecha:today(), importe:coste, iva:0, concepto:tipo, estado:'Pendiente'};
-    DB.facturas.push(nf);
-    facturaId=nf.id;
-    updateBadgePendiente();
-    updateKPIs();
-  }
-  const nt={
-    id:DB.nextTratId++, pacienteId:pacId, tipo,
-    doctor:document.getElementById('trat-doctor').value,
-    inicio:document.getElementById('trat-inicio').value||today(),
-    sesiones:parseInt(document.getElementById('trat-sesiones').value)||1,
-    sesionesHechas:0, coste, estado:'En curso', facturaId,
-    notas:document.getElementById('trat-notas').value||''
-  };
-  DB.tratamientos.push(nt);
-  const p=getPaciente(pacId);
-  if(p.estado==='Activo'||p.estado==='Alta reciente') p.estado='En tratamiento';
-  toast('Tratamiento "'+tipo+'" registrado'+(facAuto&&coste>0?' + factura generada':''));
-  closeModal('modal-tratamiento');
-  renderTratamientos();
-  renderPacientes();
-  addActivity('ti-tooth','#fef3c7','var(--yellow)','Nuevo tratamiento',tipo+' · '+getPaciente(pacId).nombre);
+function rChStk(){
+  const ms=getMeses();
+  const fac=ms.map(m=>DB.facturas.filter(f=>{const d=new Date(f.fecha);return d.getMonth()===m.m&&d.getFullYear()===m.y;}).reduce((s,f)=>s+f.imp,0));
+  const cob=ms.map(m=>DB.facturas.filter(f=>{const d=new Date(f.fecha);return d.getMonth()===m.m&&d.getFullYear()===m.y&&f.estado==='Pagada';}).reduce((s,f)=>s+f.imp,0));
+  const ctx=document.getElementById('ch-stk');if(!ctx)return;if(CH.stk)CH.stk.destroy();
+  CH.stk=new Chart(ctx,{type:'bar',data:{labels:ms.map(m=>m.l),datasets:[{label:'Cobrado',data:cob,backgroundColor:'#059669',borderRadius:3},{label:'Pendiente',data:fac.map((f,i)=>Math.max(0,f-cob[i])),backgroundColor:'#d97706',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{callback:v=>v+'€'}}}}});
 }
 
-function guardarFactura(){
-  const pacId=parseInt(document.getElementById('fac-paciente').value);
-  const importe=parseFloat(document.getElementById('fac-importe').value);
-  if(!pacId||isNaN(importe)||importe<=0){toast('Completa los campos obligatorios','error');return;}
-  const fNum=`BT-2026-${String(DB.nextFacturaId).padStart(3,'0')}`;
-  const nf={
-    id:DB.nextFacturaId++, num:fNum, pacienteId:pacId,
-    tratamientoId:parseInt(document.getElementById('fac-tratamiento').value)||null,
-    fecha:document.getElementById('fac-fecha').value||today(),
-    importe, iva:parseInt(document.getElementById('fac-iva').value)||0,
-    concepto:document.getElementById('fac-concepto').value||'Servicios dentales',
-    estado:document.getElementById('fac-estado').value
-  };
-  DB.facturas.push(nf);
-  toast('Factura '+fNum+' creada');
-  closeModal('modal-factura');
-  renderFacturas();
-  updateKPIs();
-  addActivity('ti-receipt','var(--green-soft)','var(--green)','Nueva factura',fNum+' · '+importe+'€');
+function rChDon(){
+  const tipos={};DB.facturas.forEach(f=>{tipos[f.concepto]=(tipos[f.concepto]||0)+f.imp;});
+  const ctx=document.getElementById('ch-don');if(!ctx)return;if(CH.don)CH.don.destroy();
+  CH.don=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(tipos),datasets:[{data:Object.values(tipos),backgroundColor:['#1a7fd4','#059669','#d97706','#7c3aed','#dc2626','#0891b2','#65a30d']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}});
 }
 
-function guardarRadiografia(){
-  const pacId=parseInt(document.getElementById('xray-paciente').value);
-  if(!pacId){toast('Selecciona un paciente','error');return;}
-  const fileInput=document.getElementById('xray-file');
-  const file=fileInput.files[0];
-  const guardar=(archivoUrl)=>{
-    const nx={
-      id:DB.nextXrayId++, pacienteId:pacId,
-      tipo:document.getElementById('xray-tipo').value,
-      fecha:document.getElementById('xray-fecha').value||today(),
-      doctor:'Dra. Eider Landa',
-      notas:document.getElementById('xray-notas').value||'',
-      archivo:archivoUrl||null
-    };
-    DB.radiografias.push(nx);
-    toast('Radiografía guardada'+(archivoUrl?' con imagen':''));
-    closeModal('modal-radiografia');
-    document.getElementById('uploaded-files-list').innerHTML='';
-    fileInput.value='';
-    if(document.getElementById('page-radiografias').classList.contains('active')) renderRadiografias();
-  };
-  if(file){
-    const reader=new FileReader();
-    reader.onload=e=>guardar(e.target.result);
-    reader.readAsDataURL(file);
-  } else { guardar(null); }
+function rTipos(){
+  const tipos={};const tot=DB.facturas.reduce((s,f)=>s+f.imp,0);
+  DB.facturas.forEach(f=>{if(!tipos[f.concepto])tipos[f.concepto]={n:0,imp:0};tipos[f.concepto].n++;tipos[f.concepto].imp+=f.imp;});
+  document.getElementById('tbody-tipos').innerHTML=Object.entries(tipos).sort((a,b)=>b[1].imp-a[1].imp).map(([k,v])=>`<tr><td>${k}</td><td>${v.n}</td><td>${v.imp.toLocaleString('es-ES')}€</td><td>${tot?Math.round(v.imp/tot*100):0}%</td></tr>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════════
-// ACCIONES SOBRE FACTURAS
-// ═══════════════════════════════════════════════════════════
-function marcarPagada(id){
-  const f=DB.facturas.find(f=>f.id===id);
-  if(f){ f.estado='Pagada'; renderFacturas(); updateKPIs(); updateBadgePendiente(); toast('Factura '+f.num+' marcada como pagada'); addActivity('ti-check','var(--green-soft)','var(--green)','Factura cobrada',f.num+' · '+f.importe+'€'); }
-}
-function marcarPendiente(id){
-  const f=DB.facturas.find(f=>f.id===id);
-  if(f){ f.estado='Pendiente'; renderFacturas(); updateKPIs(); updateBadgePendiente(); toast('Factura reabierta','info'); }
+function rEst(){
+  const tot=DB.facturas.reduce((s,f)=>s+f.imp,0);
+  document.getElementById('tbody-est').innerHTML=['Pagada','Pendiente','Vencida'].map(est=>{
+    const g=DB.facturas.filter(f=>f.estado===est);const s=g.reduce((a,f)=>a+f.imp,0);
+    return`<tr><td>${bdg(est)}</td><td>${g.length}</td><td>${s.toLocaleString('es-ES')}€</td><td>${tot?Math.round(s/tot*100):0}%</td><td><button class="btn bsm" onclick="showPage('facturas',document.querySelectorAll('.sbi')[5])"><i class="ti ti-arrow-right"></i></button></td></tr>`;
+  }).join('');
 }
 
-// ═══════════════════════════════════════════════════════════
-// ELIMINAR (ADMIN ONLY)
-// ═══════════════════════════════════════════════════════════
-function eliminarPaciente(id){
-  if(currentRole!=='admin'){toast('Sin permisos','error');return;}
-  if(!confirm('¿Eliminar este paciente y todos sus registros asociados?'))return;
-  DB.pacientes=DB.pacientes.filter(p=>p.id!==id);
-  DB.tratamientos=DB.tratamientos.filter(t=>t.pacienteId!==id);
-  DB.facturas=DB.facturas.filter(f=>f.pacienteId!==id);
-  DB.radiografias=DB.radiografias.filter(x=>x.pacienteId!==id);
-  renderPacientes(); updateKPIs(); updateBadgePendiente();
-  toast('Paciente eliminado');
-}
-function eliminarTratamiento(id){
-  if(currentRole!=='admin'){toast('Sin permisos','error');return;}
-  if(!confirm('¿Eliminar este tratamiento?'))return;
-  DB.tratamientos=DB.tratamientos.filter(t=>t.id!==id);
-  renderTratamientos(); toast('Tratamiento eliminado');
-}
-function eliminarFactura(id){
-  if(currentRole!=='admin'){toast('Sin permisos','error');return;}
-  if(!confirm('¿Eliminar esta factura?'))return;
-  DB.facturas=DB.facturas.filter(f=>f.id!==id);
-  renderFacturas(); updateKPIs(); updateBadgePendiente(); toast('Factura eliminada');
-}
-function confirmDanger(tipo){
-  if(tipo==='borrar'){
-    if(confirm('⚠️ ATENCIÓN: Esto borrará TODOS los datos. ¿Continuar?')){
-      DB.pacientes=[]; DB.tratamientos=[]; DB.facturas=[]; DB.radiografias=[];
-      renderPacientes(); renderTratamientos(); renderFacturas(); updateKPIs(); updateBadgePendiente();
-      toast('Base de datos limpiada','info');
-    }
-  } else {
-    toast('Exportación iniciada — descargando...','info');
-  }
+function rCPac(){
+  document.getElementById('tbody-cpac').innerHTML=DB.pacientes.map(p=>{
+    const fs=DB.facturas.filter(f=>f.pacienteId===p.id);if(!fs.length)return'';
+    const tot=fs.reduce((s,f)=>s+f.imp,0);const cob=fs.filter(f=>f.estado==='Pagada').reduce((s,f)=>s+f.imp,0);
+    return`<tr><td class="tl" onclick="abrirFicha(${p.id})">${p.nombre}</td><td>${fs.length}</td><td>${tot.toLocaleString('es-ES')}€</td><td style="color:var(--green)">${cob.toLocaleString('es-ES')}€</td><td style="color:var(--yellow)">${(tot-cob).toLocaleString('es-ES')}€</td></tr>`;
+  }).join('');
 }
 
-// ═══════════════════════════════════════════════════════════
-// FILTROS DE TABLAS
-// ═══════════════════════════════════════════════════════════
-function filterTable(input, tableId){
-  const q=input.value.toLowerCase();
-  document.querySelectorAll('#'+tableId+' tbody tr').forEach(row=>{
-    row.style.display=row.textContent.toLowerCase().includes(q)?'':'none';
-  });
-}
-function filterEstado(sel,tableId){
-  const v=sel.value.toLowerCase();
-  document.querySelectorAll('#'+tableId+' tbody tr').forEach(row=>{
-    row.style.display=!v||row.textContent.toLowerCase().includes(v)?'':'none';
-  });
+function rChDash(){
+  const ms=getMeses();
+  const cob=ms.map(m=>DB.facturas.filter(f=>{const d=new Date(f.fecha);return d.getMonth()===m.m&&d.getFullYear()===m.y&&f.estado==='Pagada';}).reduce((s,f)=>s+f.imp,0));
+  const ctx=document.getElementById('chart-dash');if(!ctx)return;if(CH.dash)CH.dash.destroy();
+  CH.dash=new Chart(ctx,{type:'bar',data:{labels:ms.map(m=>m.l),datasets:[{label:'Ingresos cobrados (€)',data:cob,backgroundColor:'rgba(26,127,212,.7)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'€'}}}}});
 }
 
-// ═══════════════════════════════════════════════════════════
-// UPLOAD ZONE
-// ═══════════════════════════════════════════════════════════
-function handleFileSelect(event){
-  const file=event.target.files[0];
-  if(file) addFileToList(file);
-}
-function handleDrop(event){
-  event.preventDefault();
-  document.getElementById('upload-zone').classList.remove('drag');
-  const file=event.dataTransfer.files[0];
-  if(file){ document.getElementById('xray-file').files=event.dataTransfer.files; addFileToList(file); }
-}
-function addFileToList(file){
-  const list=document.getElementById('uploaded-files-list');
-  list.innerHTML=`<div class="uploaded-file"><i class="ti ti-photo"></i><span>${file.name} (${(file.size/1024).toFixed(0)} KB)</span><button onclick="document.getElementById('xray-file').value='';this.parentNode.remove()" title="Quitar"><i class="ti ti-x"></i></button></div>`;
+// ── CAPTACIÓN ──
+function rCapt(){
+  const tot=DB.pacientes.length;const nue=DB.pacientes.filter(p=>p.estado==='Alta reciente').length;
+  const conv=tot?Math.round(DB.pacientes.filter(p=>p.estado==='En tratamiento').length/tot*100):0;
+  const web=DB.citas.filter(c=>c.origen==='Web').length;
+  document.getElementById('capt-kpis').innerHTML=`
+    <div class="kpi"><div class="kpi-l">Pacientes nuevos</div><div class="kpi-v">${nue}</div><div class="kpi-s">Alta reciente</div></div>
+    <div class="kpi"><div class="kpi-l">Citas desde web</div><div class="kpi-v">${web}</div><div class="kpi-s kg">captadas online</div></div>
+    <div class="kpi"><div class="kpi-l">Tasa conversión</div><div class="kpi-v">${conv}%</div><div class="kpi-s kg">a tratamiento activo</div></div>
+    <div class="kpi"><div class="kpi-l">Total cartera</div><div class="kpi-v">${tot}</div><div class="kpi-s">pacientes</div></div>`;
+  const ms=getMeses();
+  const cnts=ms.map(m=>DB.pacientes.filter(p=>{if(!p.ca)return false;const d=new Date(p.ca);return d.getMonth()===m.m&&d.getFullYear()===m.y;}).length);
+  const ctx1=document.getElementById('ch-nue');if(CH.nue)CH.nue.destroy();
+  CH.nue=new Chart(ctx1,{type:'line',data:{labels:ms.map(m=>m.l),datasets:[{label:'Nuevos pacientes',data:cnts,borderColor:'#1a7fd4',backgroundColor:'rgba(26,127,212,.15)',tension:.35,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+  const zonas={};DB.pacientes.forEach(p=>{const z=p.zona||'Otro';zonas[z]=(zonas[z]||0)+1;});
+  const ctx2=document.getElementById('ch-zon');if(CH.zon)CH.zon.destroy();
+  CH.zon=new Chart(ctx2,{type:'doughnut',data:{labels:Object.keys(zonas),datasets:[{data:Object.values(zonas),backgroundColor:['#1a7fd4','#059669','#d97706','#7c3aed','#0891b2','#65a30d']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}});
+  const zonaTop=Object.entries(zonas).sort((a,b)=>b[1]-a[1])[0];
+  const recs=[
+    ...(nue<3?[{e:'📈',t:'Capta más pacientes nuevos',d:'Google Ads para "dentista Deusto" y "implantes Bilbao". CPC estimado: 1,80€.'}]:[]),
+    ...(conv<50?[{e:'🎯',t:'Mejora conversión de citas',d:'Llama 24h antes de la cita. Las clínicas con recordatorio tienen 40% menos no-shows.'}]:[]),
+    ...(zonaTop?[{e:'📍',t:`Zona fuerte: ${zonaTop[0]}`,d:`Concentra publicidad en ${zonaTop[0]} y municipios cercanos. Radio 5km máximo.`}]:[]),
+    {e:'🤝',t:'Programa de referidos',d:'10% descuento por cada paciente que traiga otro. Incrementa retención y captación.'},
+    {e:'⭐',t:'Reseñas Google',d:'Pide reseña al terminar tratamientos exitosos. +1 estrella = +30% conversión web.'},
+    ...(web>0?[{e:'🌐',t:`${web} cita${web>1?'s':''} desde la web`,d:'Las citas captadas online se sincronizan automáticamente en la agenda. ¡Buen ritmo!'}]:[]),
+  ];
+  document.getElementById('recs').innerHTML=recs.map(r=>`<div class="rci"><div class="rce">${r.e}</div><div class="rcb"><strong>${r.t}</strong><span>${r.d}</span></div></div>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════════
-// ACTIVIDAD
-// ═══════════════════════════════════════════════════════════
-function addActivity(icon,bgColor,color,title,sub){
-  const list=document.getElementById('activity-list');
-  const item=document.createElement('div');
-  item.className='activity-item';
-  item.innerHTML=`<div class="activity-icon" style="background:${bgColor}"><i class="ti ${icon}" style="color:${color};font-size:14px"></i></div><div class="activity-text"><strong>${title}</strong><p>${sub}</p></div><span class="activity-time">Ahora</span>`;
-  list.insertBefore(item,list.firstChild);
-  if(list.children.length>8) list.removeChild(list.lastChild);
-}
+// ── ADMIN ──
+function borrarTodo(){DB.pacientes=[];DB.tratamientos=[];DB.facturas=[];DB.radiografias=[];DB.citas=[];rPac();rFac();rAgenda();updKPIs();poblarSels();toast('Base de datos limpiada','i');}
 
-// ═══════════════════════════════════════════════════════════
-// MODALES
-// ═══════════════════════════════════════════════════════════
-function openModal(id){
-  document.getElementById(id).classList.add('open');
-  // Pre-fill fecha actual
-  const dateInputs=document.querySelectorAll('#'+id+' input[type="date"]');
-  dateInputs.forEach(i=>{if(!i.value)i.value=today();});
-}
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(m=>{
-  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
-});
+// ── FILTROS ──
+function filterT(inp,tid){const q=inp.value.toLowerCase();document.querySelectorAll('#'+tid+' tbody tr').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';});}
+function filterE(sel,tid){const v=sel.value.toLowerCase();document.querySelectorAll('#'+tid+' tbody tr').forEach(r=>{r.style.display=!v||r.textContent.toLowerCase().includes(v)?'':'none';});}
 
-// ═══════════════════════════════════════════════════════════
-// EXPORT CSV
-// ═══════════════════════════════════════════════════════════
-function exportCSV(tableId,filename){
-  const rows=document.querySelectorAll('#'+tableId+' tr');
+// ── EXPORT ──
+function expCSV(tid,fn){
+  const rows=document.querySelectorAll('#'+tid+' tr');
   const csv=Array.from(rows).map(r=>Array.from(r.querySelectorAll('th,td')).map(c=>'"'+c.innerText.replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename+'.csv'; a.click();
-  toast('CSV descargado');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download=fn+'.csv';a.click();toast('CSV descargado','s');
 }
 
-// ═══════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════
+// ── MODALS ──
+function openModal(id){document.getElementById(id).classList.add('open');document.querySelectorAll('#'+id+' input[type="date"]').forEach(i=>{if(!i.value)i.value=today();});}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.mo').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});});
+
+// ── INIT ──
 function initApp(){
-  poblarSelects();
-  updateKPIs();
-  updateBadgePendiente();
+  poblarSels();updKPIs();rChDash();
+  // Citas de hoy en dashboard
+  const hoy=today();const tb=document.getElementById('tbody-hoy');tb.innerHTML='';
+  DB.citas.filter(c=>c.fecha===hoy).forEach(c=>{const p=gPac(c.pacienteId);const wb=c.origen==='Web'?'<span class="web-badge"><i class="ti ti-world" style="font-size:9px"></i>WEB</span>':'';tb.innerHTML+=`<tr><td>${c.hora}</td><td><span class="tl" onclick="abrirFicha(${c.pacienteId})">${p.nombre}</span></td><td>${c.motivo||'—'}</td><td>${c.doctor}</td><td>${wb}</td><td>${bdg(c.estado)}</td></tr>`;});
+  // Actividad inicial
+  document.getElementById('actlist').innerHTML=`
+    <div class="ai"><div class="aico" style="background:var(--gs)"><i class="ti ti-receipt" style="color:var(--green);font-size:13px"></i></div><div class="atx"><strong>Factura pagada</strong><p>Ane Txakartegi · 320€</p></div><span class="atm">Hace 1h</span></div>
+    <div class="ai"><div class="aico" style="background:var(--bs)"><i class="ti ti-scan" style="color:var(--blue);font-size:13px"></i></div><div class="atx"><strong>Radiografía subida</strong><p>Mikel Garate · Panorámica</p></div><span class="atm">Hace 2h</span></div>
+    <div class="ai"><div class="aico" style="background:var(--ys)"><i class="ti ti-tooth" style="color:var(--yellow);font-size:13px"></i></div><div class="atx"><strong>Tratamiento iniciado</strong><p>Leire Iturriaga · Ortodoncia</p></div><span class="atm">Ayer</span></div>`;
+  // Auto-sync citas web al entrar
+  setTimeout(syncCitasWeb, 1500);
 }
 </script>
 </body>
