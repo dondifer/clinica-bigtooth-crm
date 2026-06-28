@@ -448,6 +448,68 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
 });
+
+// ── INTEGRACIÓN CON WEB BIGTOOTH — cargar citas desde /api/citas ──
+async function cargarCitasWeb() {
+  try {
+    const res = await fetch('/api/citas');
+    if (!res.ok) return;
+    const citas = await res.json();
+    if (!Array.isArray(citas) || citas.length === 0) return;
+
+    // Actualizar badge de agenda
+    const badge = document.getElementById('badge-agenda');
+    if (badge) badge.textContent = (parseInt(badge.textContent || '0', 10) + citas.length);
+
+    // Buscar contenedor de actividad reciente y prepender las citas web
+    const activityList = document.querySelector('#page-dashboard .activity-list');
+    if (activityList && citas.length > 0) {
+      const recientes = citas.slice(-3).reverse();
+      recientes.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'activity-item';
+        const fecha = new Date(c.created_at);
+        const hace = Math.round((Date.now() - fecha.getTime()) / 60000);
+        const tiempo = hace < 60 ? `Hace ${hace} min` : hace < 1440 ? `Hace ${Math.round(hace/60)}h` : `Hace ${Math.round(hace/1440)}d`;
+        item.innerHTML = `
+          <div class="act-dot" style="background:#1D9E75"></div>
+          <div>
+            <div class="act-text">🌐 <strong>Nueva cita desde la web</strong> — ${c.nombre}</div>
+            <div class="act-time">${tiempo} · ${c.tratamiento} · ${c.telefono}</div>
+          </div>`;
+        activityList.insertBefore(item, activityList.firstChild);
+      });
+    }
+
+    // Añadir filas a la tabla de agenda completa
+    const agendaTable = document.querySelector('#page-agenda tbody');
+    if (agendaTable) {
+      citas.reverse().forEach(c => {
+        const tr = document.createElement('tr');
+        const fecha = new Date(c.created_at);
+        const hora = fecha.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+        tr.innerHTML = `
+          <td style="font-weight:600">${hora}</td>
+          <td><div class="td-name">${c.nombre}</div><div class="td-sub">📞 ${c.telefono}</div></td>
+          <td>${c.tratamiento}</td>
+          <td>—</td>
+          <td>No</td>
+          <td><span class="badge badge-amber">Web · Pendiente</span></td>
+          <td><button class="btn" style="padding:3px 8px;font-size:11px">Confirmar</button></td>
+        `;
+        agendaTable.insertBefore(tr, agendaTable.firstChild);
+      });
+    }
+
+    console.log(`✓ ${citas.length} citas web cargadas del endpoint`);
+  } catch(err) {
+    console.log('CRM working offline:', err.message);
+  }
+}
+
+// Cargar al iniciar y refrescar cada 30s
+cargarCitasWeb();
+setInterval(cargarCitasWeb, 30000);
 </script>
 </body>
 </html>
