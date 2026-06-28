@@ -648,22 +648,27 @@ body.is-admin .admin-block{display:block}
 // ── AUTH ──
 const USERS={admin:{pass:'admin123',role:'admin',name:'Dr. Admin',init:'DA'},recepcion:{pass:'rec123',role:'employee',name:'Recepción',init:'R'}};
 let CU=null;
+function applyUser(u){
+  CU=USERS[u];document.body.classList.toggle('is-admin',CU.role==='admin');
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('rbadge').textContent=CU.role==='admin'?'Admin':'Recepción';
+  document.getElementById('rbadge').className='rbadge '+(CU.role==='admin'?'rba':'rbe');
+  document.getElementById('uname').textContent=CU.name.split(' ')[0];
+  document.getElementById('uav').textContent=CU.init;
+}
 function doLogin(){
   const u=document.getElementById('lu').value.trim().toLowerCase();
   const p=document.getElementById('lp').value;
   if(USERS[u]&&USERS[u].pass===p){
-    CU=USERS[u];document.body.classList.toggle('is-admin',CU.role==='admin');
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app').classList.add('visible');
-    document.getElementById('rbadge').textContent=CU.role==='admin'?'Admin':'Recepción';
-    document.getElementById('rbadge').className='rbadge '+(CU.role==='admin'?'rba':'rbe');
-    document.getElementById('uname').textContent=CU.name.split(' ')[0];
-    document.getElementById('uav').textContent=CU.init;
-    document.getElementById('lerr').classList.remove('show');
+    sessionStorage.setItem('bt_user',u);
+    applyUser(u);document.getElementById('lerr').classList.remove('show');
     initApp();
   }else{document.getElementById('lerr').classList.add('show');document.getElementById('lp').value='';}
 }
-function doLogout(){CU=null;document.body.classList.remove('is-admin');document.getElementById('login-screen').style.display='flex';document.getElementById('app').classList.remove('visible');}
+function doLogout(){CU=null;sessionStorage.removeItem('bt_user');document.body.classList.remove('is-admin');document.getElementById('login-screen').style.display='flex';document.getElementById('app').classList.remove('visible');}
+// Restaurar sesión al recargar
+(function(){const u=sessionStorage.getItem('bt_user');if(u&&USERS[u]){applyUser(u);initApp();}})();
 
 // ── DB ──
 const DB={
@@ -804,65 +809,68 @@ function sPtab(el,cid){
 }
 
 // ── SYNC CITAS WEB ──
-const API_CITAS='https://clinica-bigtooth.netlify.app/api/citas';
-let lastSync=null;
+// URLs candidatas para la API de citas (Netlify Functions puede estar en /.netlify/functions/ o /api/)
+const API_URLS=['https://clinica-bigtooth.netlify.app/api/citas','https://clinica-bigtooth.netlify.app/.netlify/functions/citas'];
+
+async function fetchCitasWeb(){
+  for(const url of API_URLS){
+    try{
+      const res=await fetch(url,{signal:AbortSignal.timeout(6000)});
+      if(!res.ok)continue;
+      const ct=res.headers.get('content-type')||'';
+      if(!ct.includes('json'))continue;
+      const data=await res.json();
+      // Normalizar: puede venir como array, {citas:[]}, {data:[]}, {reservas:[]}
+      return Array.isArray(data)?data:data.citas||data.data||data.reservas||data.items||[];
+    }catch(_){}
+  }
+  return null; // null = no disponible
+}
+
+function procesarCitaWeb(cw){
+  const wid=String(cw.id||cw._id||cw.webId||'');
+  if(wid&&DB.citas.find(c=>c.webId===wid)){
+    // ya existe — actualizar estado si cambió
+    const ex=DB.citas.find(c=>c.webId===wid);
+    const est=cw.estado||'';
+    if(est)ex.estado=est==='confirmada'||est==='Confirmada'?'Confirmada':est==='cancelada'?'Cancelada':'Pendiente';
+    return false;
+  }
+  // Normalizar campos (los forms web usan nombres distintos)
+  const nom=(cw.nombre||cw.name||cw.paciente||'').trim();
+  const tel=(cw.telefono||cw.tel||cw.phone||'').replace(/\D/g,'');
+  const email=cw.email||cw.correo||'—';
+  const fecha=cw.fecha||cw.fecha_preferida||cw.date||today();
+  const hora=cw.hora||cw.hora_preferida||cw.time||'—';
+  const motivo=cw.tratamiento||cw.motivo||cw.servicio||cw.treatment||cw.subject||'Consulta web';
+  const notas=(cw.mensaje||cw.notas||cw.message||'')+(email!=='—'?` · ${email}`:'');
+  if(!nom&&!tel)return false;
+  // Buscar paciente por tel o nombre
+  let pac=DB.pacientes.find(p=>tel&&p.tel.replace(/\D/g,'')===tel)||
+          DB.pacientes.find(p=>nom&&p.nombre.toLowerCase()===nom.toLowerCase());
+  if(!pac&&nom){
+    pac={id:DB.nPac++,nombre:nom,dni:'—',tel:tel||'—',email,zona:'—',dir:'—',fnac:'—',alg:'Ninguna',med:'Ninguna',obs:'Captado desde web',estado:'Alta reciente',ca:today()};
+    DB.pacientes.push(pac);poblarSels();
+  }
+  if(!pac)return false;
+  DB.citas.push({id:DB.nCita++,webId:wid||String(Date.now()+Math.random()),pacienteId:pac.id,fecha,hora,doctor:'Dra. Eider Landa',motivo,dur:'45 min',estado:'Pendiente',notas,origen:'Web'});
+  return true;
+}
 
 async function syncCitasWeb(){
   const btn=document.getElementById('btn-sync');
-  btn.innerHTML='<i class="ti ti-loader-2 ti-spin"></i> Sincronizando...';
-  btn.disabled=true;
-  try{
-    const res=await fetch(API_CITAS,{signal:AbortSignal.timeout(8000)});
-    if(!res.ok)throw new Error('HTTP '+res.status);
-    const data=await res.json();
-    const citasWeb=Array.isArray(data)?data:(data.citas||[]);
-    let nuevas=0;
-    citasWeb.forEach(cw=>{
-      // Buscar si ya existe por id de la web (guardado en webId)
-      const existe=DB.citas.find(c=>c.webId===cw.id||c.webId===String(cw.id));
-      if(existe){
-        // Actualizar estado si cambió
-        if(cw.estado&&cw.estado!==existe.estado){existe.estado=cw.estado==='confirmada'?'Confirmada':'Pendiente';}
-      }else{
-        // Buscar paciente existente por nombre o teléfono
-        const nomWeb=(cw.nombre||cw.name||'').trim();
-        const telWeb=(cw.telefono||cw.tel||cw.phone||'').replace(/\s/g,'');
-        let pac=DB.pacientes.find(p=>p.tel.replace(/\s/g,'')===telWeb&&telWeb)||
-                DB.pacientes.find(p=>p.nombre.toLowerCase()===nomWeb.toLowerCase()&&nomWeb);
-        // Si no existe el paciente, crearlo como "Alta reciente"
-        if(!pac&&nomWeb){
-          pac={id:DB.nPac++,nombre:nomWeb,dni:'—',tel:telWeb||'—',email:cw.email||'—',zona:'—',dir:'—',fnac:'—',alg:'Ninguna',med:'Ninguna',obs:'Captado desde web',estado:'Alta reciente',ca:today()};
-          DB.pacientes.push(pac);
-          poblarSels();
-        }
-        if(pac){
-          DB.citas.push({
-            id:DB.nCita++,
-            webId:cw.id||String(Date.now()),
-            pacienteId:pac.id,
-            fecha:cw.fecha||(cw.fecha_preferida)||today(),
-            hora:cw.hora||cw.hora_preferida||'—',
-            doctor:cw.doctor||'Dra. Eider Landa',
-            motivo:cw.tratamiento||cw.motivo||cw.servicio||'Consulta web',
-            dur:'45 min',
-            estado:cw.estado==='confirmada'?'Confirmada':'Pendiente',
-            notas:(cw.mensaje||cw.notas||'')+(cw.email?` | email: ${cw.email}`:''),
-            origen:'Web'
-          });
-          nuevas++;
-        }
-      }
-    });
-    lastSync=new Date().toLocaleTimeString('es-ES');
-    document.getElementById('sync-status').textContent=`Último sync: ${lastSync} · ${nuevas} nueva${nuevas!==1?'s':''} de ${citasWeb.length} total`;
+  btn.innerHTML='<i class="ti ti-loader-2"></i> Sync...';btn.disabled=true;
+  const citasWeb=await fetchCitasWeb();
+  if(citasWeb===null){
+    document.getElementById('sync-status').textContent='API no disponible';
+    toast('API web sin respuesta','i');
+  }else{
+    const nuevas=citasWeb.filter(cw=>procesarCitaWeb(cw)).length;
+    const t=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('sync-status').textContent=`Sync ${t} · ${nuevas} nueva${nuevas!==1?'s':''} / ${citasWeb.length} total`;
     updKPIs();rAgenda();
-    if(nuevas>0){toast(`${nuevas} cita${nuevas>1?'s':''} nueva${nuevas>1?'s':''} desde la web`,'i');addAct('ti-world','#ede9fe','#7c3aed','Citas web sincronizadas',`${nuevas} nueva${nuevas>1?'s':''}`);}
-    else toast('Sin citas nuevas · todo al día','s');
-  }catch(err){
-    // API no disponible — mostrar aviso suave sin romper la app
-    const msg=err.message.includes('timeout')||err.message.includes('fetch')?'API web sin respuesta (normal en demo)':err.message;
-    document.getElementById('sync-status').textContent=`Sync: ${msg}`;
-    toast('API web no accesible en este momento','i');
+    if(nuevas>0){toast(`${nuevas} cita${nuevas>1?'s':''} nueva${nuevas>1?'s':''} desde la web`,'i');addAct('ti-world','#ede9fe','#7c3aed','Citas web',`${nuevas} nueva${nuevas>1?'s':''}`);}
+    else toast('Sin citas nuevas','s');
   }
   btn.innerHTML='<i class="ti ti-refresh"></i> Sync web';btn.disabled=false;
 }
