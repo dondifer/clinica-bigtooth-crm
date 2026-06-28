@@ -327,7 +327,7 @@ body.is-admin .admin-block{display:block}
 
       <div class="sbs">Clínica</div>
       <button class="sbi" onclick="showPage('pacientes',this)"><i class="ti ti-user-heart"></i>Pacientes</button>
-      <button class="sbi" onclick="showPage('tratamientos',this)"><i class="ti ti-tooth"></i>Tratamientos</button>
+      <button class="sbi" onclick="showPage('tratamientos',this)"><i class="ti ti-activity-heartbeat"></i>Tratamientos</button>
       <button class="sbi" onclick="showPage('radiografias',this)"><i class="ti ti-scan"></i>Radiografías</button>
 
       <div class="sbs">Finanzas</div>
@@ -809,68 +809,44 @@ function sPtab(el,cid){
 }
 
 // ── SYNC CITAS WEB ──
-// URLs candidatas para la API de citas (Netlify Functions puede estar en /.netlify/functions/ o /api/)
-const API_URLS=['https://clinica-bigtooth.netlify.app/api/citas','https://clinica-bigtooth.netlify.app/.netlify/functions/citas'];
-
-async function fetchCitasWeb(){
-  for(const url of API_URLS){
-    try{
-      const res=await fetch(url,{signal:AbortSignal.timeout(6000)});
-      if(!res.ok)continue;
-      const ct=res.headers.get('content-type')||'';
-      if(!ct.includes('json'))continue;
-      const data=await res.json();
-      // Normalizar: puede venir como array, {citas:[]}, {data:[]}, {reservas:[]}
-      return Array.isArray(data)?data:data.citas||data.data||data.reservas||data.items||[];
-    }catch(_){}
-  }
-  return null; // null = no disponible
-}
-
-function procesarCitaWeb(cw){
-  const wid=String(cw.id||cw._id||cw.webId||'');
-  if(wid&&DB.citas.find(c=>c.webId===wid)){
-    // ya existe — actualizar estado si cambió
-    const ex=DB.citas.find(c=>c.webId===wid);
-    const est=cw.estado||'';
-    if(est)ex.estado=est==='confirmada'||est==='Confirmada'?'Confirmada':est==='cancelada'?'Cancelada':'Pendiente';
-    return false;
-  }
-  // Normalizar campos (los forms web usan nombres distintos)
-  const nom=(cw.nombre||cw.name||cw.paciente||'').trim();
-  const tel=(cw.telefono||cw.tel||cw.phone||'').replace(/\D/g,'');
-  const email=cw.email||cw.correo||'—';
-  const fecha=cw.fecha||cw.fecha_preferida||cw.date||today();
-  const hora=cw.hora||cw.hora_preferida||cw.time||'—';
-  const motivo=cw.tratamiento||cw.motivo||cw.servicio||cw.treatment||cw.subject||'Consulta web';
-  const notas=(cw.mensaje||cw.notas||cw.message||'')+(email!=='—'?` · ${email}`:'');
-  if(!nom&&!tel)return false;
-  // Buscar paciente por tel o nombre
-  let pac=DB.pacientes.find(p=>tel&&p.tel.replace(/\D/g,'')===tel)||
-          DB.pacientes.find(p=>nom&&p.nombre.toLowerCase()===nom.toLowerCase());
-  if(!pac&&nom){
-    pac={id:DB.nPac++,nombre:nom,dni:'—',tel:tel||'—',email,zona:'—',dir:'—',fnac:'—',alg:'Ninguna',med:'Ninguna',obs:'Captado desde web',estado:'Alta reciente',ca:today()};
-    DB.pacientes.push(pac);poblarSels();
-  }
-  if(!pac)return false;
-  DB.citas.push({id:DB.nCita++,webId:wid||String(Date.now()+Math.random()),pacienteId:pac.id,fecha,hora,doctor:'Dra. Eider Landa',motivo,dur:'45 min',estado:'Pendiente',notas,origen:'Web'});
-  return true;
-}
+// API en el propio CRM (clinica-bigtooth-crm.netlify.app/api/citas)
+// Formato real: array de {id,nombre,telefono,email,tratamiento,mensaje,estado,created_at}
+const API_CITAS='https://clinica-bigtooth-crm.netlify.app/api/citas';
 
 async function syncCitasWeb(){
   const btn=document.getElementById('btn-sync');
+  const st=document.getElementById('sync-status');
   btn.innerHTML='<i class="ti ti-loader-2"></i> Sync...';btn.disabled=true;
-  const citasWeb=await fetchCitasWeb();
-  if(citasWeb===null){
-    document.getElementById('sync-status').textContent='API no disponible';
-    toast('API web sin respuesta','i');
-  }else{
-    const nuevas=citasWeb.filter(cw=>procesarCitaWeb(cw)).length;
+  try{
+    const res=await fetch(API_CITAS,{signal:AbortSignal.timeout(8000)});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const citas=await res.json(); // array directo
+    let nuevas=0;
+    citas.forEach(cw=>{
+      if(DB.citas.find(c=>c.webId===cw.id))return; // ya importada
+      const nom=(cw.nombre||'').trim();
+      const tel=(cw.telefono||'').replace(/\D/g,'');
+      let pac=DB.pacientes.find(p=>tel&&p.tel.replace(/\D/g,'')===tel)||
+              DB.pacientes.find(p=>nom&&p.nombre.toLowerCase()===nom.toLowerCase());
+      if(!pac&&nom){
+        pac={id:DB.nPac++,nombre:nom,dni:'—',tel:cw.telefono||'—',email:cw.email||'—',zona:'—',dir:'—',fnac:'—',alg:'Ninguna',med:'Ninguna',obs:'Captado desde web',estado:'Alta reciente',ca:today()};
+        DB.pacientes.push(pac);poblarSels();
+      }
+      if(!pac)return;
+      DB.citas.push({id:DB.nCita++,webId:cw.id,pacienteId:pac.id,
+        fecha:(cw.created_at||today()).split('T')[0],hora:'—',
+        doctor:'Dra. Eider Landa',motivo:cw.tratamiento||'Consulta web',
+        dur:'45 min',estado:cw.estado==='confirmada'?'Confirmada':'Pendiente',
+        notas:[cw.mensaje,cw.email].filter(Boolean).join(' · '),origen:'Web'});
+      nuevas++;
+    });
     const t=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('sync-status').textContent=`Sync ${t} · ${nuevas} nueva${nuevas!==1?'s':''} / ${citasWeb.length} total`;
+    st.textContent=`Sync ${t} · ${nuevas} nueva${nuevas!==1?'s':''} / ${citas.length} total`;
     updKPIs();rAgenda();
     if(nuevas>0){toast(`${nuevas} cita${nuevas>1?'s':''} nueva${nuevas>1?'s':''} desde la web`,'i');addAct('ti-world','#ede9fe','#7c3aed','Citas web',`${nuevas} nueva${nuevas>1?'s':''}`);}
     else toast('Sin citas nuevas','s');
+  }catch(e){
+    st.textContent='Error: '+e.message;toast('Error al sincronizar','e');
   }
   btn.innerHTML='<i class="ti ti-refresh"></i> Sync web';btn.disabled=false;
 }
