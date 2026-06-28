@@ -822,11 +822,11 @@ async function syncCitasWeb(){
   try{
     const res=await fetch(API_CITAS,{signal:AbortSignal.timeout(8000)});
     if(!res.ok)throw new Error('HTTP '+res.status);
-    const citas=await res.json();
-    if(!Array.isArray(citas))throw new Error('Respuesta no válida: '+JSON.stringify(citas).slice(0,100));
-    let nuevas=0;
-    citas.forEach(cw=>{
-      if(DB.citas.find(c=>c.webId===cw.id))return;
+    const citasAPI=await res.json();
+    if(!Array.isArray(citasAPI))throw new Error('Formato inesperado');
+    // Quitar todas las citas de origen Web y reemplazar con las de la API
+    DB.citas=DB.citas.filter(c=>c.origen!=='Web');
+    citasAPI.forEach(cw=>{
       if(DB.deletedWebIds.includes(cw.id))return;
       const nom=(cw.nombre||'').trim();
       const tel=(cw.telefono||'').replace(/\D/g,'');
@@ -842,13 +842,12 @@ async function syncCitasWeb(){
         doctor:'Dra. Eider Landa',motivo:cw.tratamiento||'Consulta web',
         dur:'45 min',estado:cw.estado==='confirmada'?'Confirmada':'Pendiente',
         notas:[cw.mensaje,cw.email].filter(Boolean).join(' · '),origen:'Web'});
-      nuevas++;
     });
     const t=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-    if(st)st.textContent=`Sync ${t} · ${nuevas} nueva${nuevas!==1?'s':''} / ${citas.length} total`;
+    const nWeb=DB.citas.filter(c=>c.origen==='Web').length;
+    if(st)st.textContent=`Sync ${t} · ${nWeb} cita${nWeb!==1?'s':''} web / ${citasAPI.length} en API`;
     updKPIs();rAgenda();
-    if(nuevas>0){toast(`${nuevas} cita${nuevas>1?'s':''} web importada${nuevas>1?'s':''}`,'i');addAct('ti-world','#ede9fe','#7c3aed','Citas web',`${nuevas} nueva${nuevas>1?'s':''}`);}
-    else toast('Agenda al día','s');
+    toast('Agenda sincronizada','s');
   }catch(e){
     if(st)st.textContent='Error: '+e.message;
     toast('Error sync: '+e.message,'e');
@@ -921,8 +920,11 @@ function guardarEditCita(){
 
 function elimCita(id){
   const c=DB.citas.find(c=>c.id===id);if(!c)return;
-  confirmar('Eliminar cita',`¿Eliminar la cita de ${gPac(c.pacienteId).nombre} el ${fd(c.fecha)} a las ${c.hora}?`,()=>{
-    if(c.webId)DB.deletedWebIds.push(c.webId);
+  confirmar('Eliminar cita',`¿Eliminar la cita de ${gPac(c.pacienteId).nombre}?`,()=>{
+    if(c.webId){
+      DB.deletedWebIds.push(c.webId);
+      fetch(API_CITAS+'?id='+c.webId,{method:'DELETE'}).catch(()=>{});
+    }
     DB.citas=DB.citas.filter(c=>c.id!==id);rAgenda();updKPIs();toast('Cita eliminada','s');
   });
 }
